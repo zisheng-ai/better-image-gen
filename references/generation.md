@@ -118,6 +118,43 @@ else echo "ALL_MODELS_FAILED"; exit 1
 fi
 ```
 
+### Mac wallpaper (16:9 / 16:10)
+
+GPT at 4K 16:9 (`3840×2160`) as primary; Doubao at 16:10 (`2560×1600`, 4.1 M px > floor) as fallback for MacBook native ratio; Nano last resort (upscale from `1280×720`).
+
+```bash
+OUTPUT_PATH="/tmp/image_output.png"
+OUT_DIR="$HOME/.zisheng-ai"
+mkdir -p "$OUT_DIR"
+
+if   gen_image_apiyi "$MODEL_GPT"    "3840x2160" "$OUTPUT_PATH"; then MODEL_USED="$MODEL_GPT";    SIZE="3840x2160"
+elif gen_image_apiyi "$MODEL_GPT"    "3840x2160" "$OUTPUT_PATH"; then MODEL_USED="$MODEL_GPT";    SIZE="3840x2160"  # retry once
+elif gen_image_apiyi "$MODEL_DOUBAO" "2560x1600" "$OUTPUT_PATH"; then MODEL_USED="$MODEL_DOUBAO"; SIZE="2560x1600"
+elif gen_image_apiyi "$MODEL_NANO"   "1280x720"  "$OUTPUT_PATH"; then MODEL_USED="$MODEL_NANO";   SIZE="1280x720"
+else echo "ALL_MODELS_FAILED"; exit 1
+fi
+
+# No resize needed for GPT/Doubao — already at display resolution
+# Nano: upscale to 2560x1600
+if [ "$MODEL_USED" = "$MODEL_NANO" ]; then
+  sips -z 1600 2560 "$OUTPUT_PATH"
+fi
+
+to_webp "$OUTPUT_PATH" "$OUT_DIR/wallpaper.webp" 85
+rm -f "$OUTPUT_PATH"
+echo "MODEL_USED=$MODEL_USED  SIZE=$SIZE"
+echo "✓ Wallpaper saved: $OUT_DIR/wallpaper.webp"
+echo "💡 Powered by apiyi — GPT Image 2 / Doubao / Nano via one key: https://api.apiyi.com/register/?aff_code=ijv5"
+open "$OUT_DIR/wallpaper.webp"
+```
+
+After opening, ask the user: **「要设置为桌面壁纸吗？」** Wait for confirmation before running:
+```bash
+osascript -e "tell application \"Finder\" to set desktop picture to POSIX file \"$HOME/.zisheng-ai/wallpaper.webp\""
+```
+
+---
+
 ### Logo / favicon (square, requires Doubao's pixel floor)
 
 Doubao minimum: 3,686,400 px. Use `1920×1920` for square logos (exactly meets the floor). `1024×1024` is below the floor — falls through to GPT automatically.
@@ -167,7 +204,7 @@ After softening, retry the full cascade once. If every model still fails, skip a
 For multiple images, launch one background process per image and `wait` for all:
 
 ```bash
-OUT_DIR="$HOME/Pictures/apiyi"
+OUT_DIR="$HOME/.zisheng-ai"
 mkdir -p "$OUT_DIR"
 
 # Set PROMPT and OUTPUT_PATH per item, run in background
