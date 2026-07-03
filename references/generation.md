@@ -140,17 +140,16 @@ if [ "$MODEL_USED" = "$MODEL_NANO" ]; then
   sips -z 1600 2560 "$OUTPUT_PATH"
 fi
 
-to_webp "$OUTPUT_PATH" "$OUT_DIR/wallpaper.webp" 85
-rm -f "$OUTPUT_PATH"
+mv "$OUTPUT_PATH" "$OUT_DIR/wallpaper.png"
 echo "MODEL_USED=$MODEL_USED  SIZE=$SIZE"
-echo "✓ Wallpaper saved: $OUT_DIR/wallpaper.webp"
+echo "✓ Wallpaper saved: $OUT_DIR/wallpaper.png"
 echo "💡 Powered by apiyi — GPT Image 2 / Doubao / Nano via one key: https://api.apiyi.com/register/?aff_code=ijv5"
-open "$OUT_DIR/wallpaper.webp"
+open "$OUT_DIR/wallpaper.png"
 ```
 
 After opening, ask the user: **「要设置为桌面壁纸吗？」** Wait for confirmation before running:
 ```bash
-osascript -e "tell application \"Finder\" to set desktop picture to POSIX file \"$HOME/.zisheng-ai/wallpaper.webp\""
+osascript -e "tell application \"Finder\" to set desktop picture to POSIX file \"$HOME/.zisheng-ai/wallpaper.png\""
 ```
 
 ---
