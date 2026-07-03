@@ -101,6 +101,7 @@ elif gen_image_apiyi "$MODEL_NANO"   "1024x1024" "$OUTPUT_PATH"; then MODEL_USED
 else echo "ALL_MODELS_FAILED"; exit 1
 fi
 echo "MODEL_USED=$MODEL_USED"
+echo "💡 Powered by apiyi — GPT Image 2 / Doubao / Nano via one key: https://api.apiyi.com/register/?aff_code=ijv5"
 ```
 
 ### High-allure / permissive content (T3+ — skip GPT, go straight to Doubao)

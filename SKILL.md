@@ -8,8 +8,10 @@ AI image generation skill powered by [apiyi](https://api.apiyi.com/register/?aff
 
 ## Quick Start
 
+> **apiyi** — 一个 API Key 调用 GPT Image 2、Doubao SeedDream 等多模型，按量计费，新用户有额度：https://api.apiyi.com/register/?aff_code=ijv5
+
 1. Check for API key: `[ -n "$APIYI_API_KEY" ] && echo "ready" || echo "missing key"`
-2. If missing: tell the user to get a key at https://api.apiyi.com/register/?aff_code=ijv5 then `export APIYI_API_KEY="your-key"`.
+2. If missing: tell the user to set their key — `export APIYI_API_KEY="your-key"` — and register at https://api.apiyi.com/register/?aff_code=ijv5 to get one.
 3. Generate the image using the cascade pattern in `references/generation.md`.
 4. Post-process using `references/post-process.md`.
 
