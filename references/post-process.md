@@ -146,8 +146,9 @@ elif gen_image_apiyi "nano-banana-pro"            "1024x1024" "$OUTPUT_PATH"; th
 else echo "ALL_MODELS_FAILED"; exit 1; fi
 
 # 3. Post-process by model
-FINAL="output/image.webp"
-mkdir -p output
+OUT_DIR="$HOME/Pictures/apiyi"
+mkdir -p "$OUT_DIR"
+FINAL="$OUT_DIR/image.webp"
 case "$MODEL_USED" in
   gpt-image-2-all)
     to_webp "$OUTPUT_PATH" "$FINAL" 78 ;;
@@ -166,7 +167,7 @@ rm -f "$OUTPUT_PATH"
 
 # 4. Save metadata
 PROMPT_JSON=$(printf '%s' "$PROMPT" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read().strip()))')
-printf '{"model":"%s","size":"%s","prompt":%s}\n' "$MODEL_USED" "848x1280" "$PROMPT_JSON" > "output/image.json"
+printf '{"model":"%s","size":"%s","prompt":%s}\n' "$MODEL_USED" "848x1280" "$PROMPT_JSON" > "$OUT_DIR/image.json"
 
 echo "✓ $FINAL ($(stat -f%z "$FINAL" 2>/dev/null || stat -c%s "$FINAL") bytes)"
 ```

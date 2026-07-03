@@ -2,7 +2,7 @@
 
 AI image generation skill powered by [apiyi](https://api.apiyi.com/register/?aff_code=ijv5) — a unified proxy that exposes GPT Image 2, Doubao SeedDream, and other models under a single OpenAI-compatible API.
 
-**Trigger this skill when:** the user asks to generate, create, or produce an image, photo, illustration, cover, banner, logo, icon, or any visual asset.
+**Trigger this skill when:** the user asks to generate, create, or produce an image, photo, illustration, cover, banner, logo, icon, or any visual asset — including Chinese requests: 生成图片、画图、出图、做封面、做 banner、做 logo、做图标、生成插图、画一张、帮我画、创作图像、制作海报。
 
 ---
 

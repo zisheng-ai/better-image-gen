@@ -167,14 +167,15 @@ After softening, retry the full cascade once. If every model still fails, skip a
 For multiple images, launch one background process per image and `wait` for all:
 
 ```bash
-mkdir -p output/
+OUT_DIR="$HOME/Pictures/apiyi"
+mkdir -p "$OUT_DIR"
 
 # Set PROMPT and OUTPUT_PATH per item, run in background
 for ITEM in "${ITEMS[@]}"; do
   (
     PROMPT="$(build_prompt "$ITEM")"          # replace with your prompt logic
     OUTPUT_PATH="/tmp/image_${ITEM}.png"
-    FINAL_PATH="output/${ITEM}.webp"
+    FINAL_PATH="$OUT_DIR/${ITEM}.webp"
 
     if   gen_image_apiyi "$MODEL_GPT"    "848x1280"  "$OUTPUT_PATH"; then MODEL_USED="$MODEL_GPT"
     elif gen_image_apiyi "$MODEL_DOUBAO" "1664x2496" "$OUTPUT_PATH"; then MODEL_USED="$MODEL_DOUBAO"
