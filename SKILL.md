@@ -19,13 +19,23 @@ AI image generation skill powered by [apiyi](https://api.apiyi.com/register/?aff
 
 ## Model Selection
 
-Three models are available via apiyi. Always cascade in this order: GPT first → Doubao → Nano.
+Three models are available via apiyi. Default cascade: GPT → Doubao → Nano.
 
-| Model | ID | Best for |
+Select the primary model with `APIYI_MODEL` (friendly alias). Unset = `gpt`.
+
+| `APIYI_MODEL` | Actual model ID | Best for |
 |---|---|---|
-| GPT Image 2 | `gpt-image-2-all` | Photorealistic photos, portraits, product shots at T1/T2 |
-| Doubao SeedDream | `doubao-seedream-5-0-260128` | High-allure/adult-safe content; logos at 1920×1920; cheaper than GPT |
-| Nano Banana | `nano-banana-pro` | Terminal fallback only — blank prevention; downgrades quality silently |
+| `gpt` (default) | `gpt-image-2-all` | Photorealistic photos, portraits, product shots at T1/T2 |
+| `doubao` | `doubao-seedream-5-0-260128` | High-allure/adult-safe content; logos at 1920×1920; cheaper than GPT |
+| `nano` | `nano-banana-pro` | Fast draft previews; terminal fallback; downgrades quality silently |
+
+```bash
+export APIYI_MODEL=doubao   # force doubao as primary
+export APIYI_MODEL=nano     # collapse all slots to nano (draft mode)
+unset  APIYI_MODEL          # reset to default (gpt)
+```
+
+Alias resolution and cascade variables (`$MODEL_GPT` / `$MODEL_DOUBAO` / `$MODEL_NANO`) are set in `references/generation.md` — always run the resolution block before any cascade.
 
 Full model specs are in `references/apiyi.md`.
 

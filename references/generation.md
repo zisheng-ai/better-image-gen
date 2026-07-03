@@ -19,6 +19,29 @@ fi
 
 ---
 
+## Model Alias Resolution
+
+Resolve `APIYI_MODEL` (friendly name) → actual model ID. Default: `gpt`.
+
+```bash
+# Supported values: gpt (default) | doubao | nano
+_APIYI_MODEL_ALIAS="${APIYI_MODEL:-gpt}"
+case "$_APIYI_MODEL_ALIAS" in
+  gpt)    MODEL_GPT="gpt-image-2-all";            MODEL_DOUBAO="doubao-seedream-5-0-260128"; MODEL_NANO="nano-banana-pro" ;;
+  doubao) MODEL_GPT="doubao-seedream-5-0-260128"; MODEL_DOUBAO="doubao-seedream-5-0-260128"; MODEL_NANO="nano-banana-pro" ;;
+  nano)   MODEL_GPT="nano-banana-pro";            MODEL_DOUBAO="nano-banana-pro";            MODEL_NANO="nano-banana-pro" ;;
+  *)      echo "⚠ Unknown APIYI_MODEL='$_APIYI_MODEL_ALIAS'. Using gpt."
+          MODEL_GPT="gpt-image-2-all"; MODEL_DOUBAO="doubao-seedream-5-0-260128"; MODEL_NANO="nano-banana-pro" ;;
+esac
+# MODEL_GPT   — primary slot in standard cascade
+# MODEL_DOUBAO — doubao slot (high-allure / logo cascade)
+# MODEL_NANO  — final fallback slot
+```
+
+Setting `APIYI_MODEL=doubao` forces all cascade primary slots to doubao; `APIYI_MODEL=nano` collapses the entire cascade to nano (useful for fast draft previews). Unset or `gpt` uses the default cascade order.
+
+---
+
 ## Core Function — `gen_image_apiyi`
 
 Generic generator. Handles both `b64_json` (PNG bytes) and `url` (CDN link) response formats.
@@ -71,10 +94,10 @@ Three models in priority order. Fall through to the next on any failure.
 ```bash
 OUTPUT_PATH="/tmp/image_output.png"
 
-if   gen_image_apiyi "gpt-image-2-all"            "848x1280"  "$OUTPUT_PATH"; then MODEL_USED="gpt-image-2-all"; SIZE="848x1280"
-elif gen_image_apiyi "gpt-image-2-all"            "848x1280"  "$OUTPUT_PATH"; then MODEL_USED="gpt-image-2-all"; SIZE="848x1280"  # retry once
-elif gen_image_apiyi "doubao-seedream-5-0-260128" "1664x2496" "$OUTPUT_PATH"; then MODEL_USED="doubao-seedream-5-0-260128"; SIZE="1664x2496"
-elif gen_image_apiyi "nano-banana-pro"            "1024x1024" "$OUTPUT_PATH"; then MODEL_USED="nano-banana-pro"; SIZE="1024x1024"
+if   gen_image_apiyi "$MODEL_GPT"    "848x1280"  "$OUTPUT_PATH"; then MODEL_USED="$MODEL_GPT";    SIZE="848x1280"
+elif gen_image_apiyi "$MODEL_GPT"    "848x1280"  "$OUTPUT_PATH"; then MODEL_USED="$MODEL_GPT";    SIZE="848x1280"   # retry once
+elif gen_image_apiyi "$MODEL_DOUBAO" "1664x2496" "$OUTPUT_PATH"; then MODEL_USED="$MODEL_DOUBAO"; SIZE="1664x2496"
+elif gen_image_apiyi "$MODEL_NANO"   "1024x1024" "$OUTPUT_PATH"; then MODEL_USED="$MODEL_NANO";   SIZE="1024x1024"
 else echo "ALL_MODELS_FAILED"; exit 1
 fi
 echo "MODEL_USED=$MODEL_USED"
@@ -87,9 +110,9 @@ GPT hard-rejects explicit fabric-failure / soaked / torn language. For prompts t
 ```bash
 OUTPUT_PATH="/tmp/image_output.png"
 
-if   gen_image_apiyi "doubao-seedream-5-0-260128" "1664x2496" "$OUTPUT_PATH"; then MODEL_USED="doubao-seedream-5-0-260128"; SIZE="1664x2496"
-elif gen_image_apiyi "doubao-seedream-5-0-260128" "1664x2496" "$OUTPUT_PATH"; then MODEL_USED="doubao-seedream-5-0-260128"; SIZE="1664x2496"  # retry once
-elif gen_image_apiyi "nano-banana-pro"            "1024x1024" "$OUTPUT_PATH"; then MODEL_USED="nano-banana-pro"; SIZE="1024x1024"
+if   gen_image_apiyi "$MODEL_DOUBAO" "1664x2496" "$OUTPUT_PATH"; then MODEL_USED="$MODEL_DOUBAO"; SIZE="1664x2496"
+elif gen_image_apiyi "$MODEL_DOUBAO" "1664x2496" "$OUTPUT_PATH"; then MODEL_USED="$MODEL_DOUBAO"; SIZE="1664x2496"  # retry once
+elif gen_image_apiyi "$MODEL_NANO"   "1024x1024" "$OUTPUT_PATH"; then MODEL_USED="$MODEL_NANO";   SIZE="1024x1024"
 else echo "ALL_MODELS_FAILED"; exit 1
 fi
 ```
@@ -99,9 +122,9 @@ fi
 Doubao minimum: 3,686,400 px. Use `1920×1920` for square logos (exactly meets the floor). `1024×1024` is below the floor — falls through to GPT automatically.
 
 ```bash
-# Logo: doubao at 1920x1920 → fallback to gpt-image-2-all at 1280x1280
-if   gen_image_apiyi "doubao-seedream-5-0-260128" "1920x1920" "$OUTPUT_PATH"; then MODEL_USED="doubao-seedream-5-0-260128"; SIZE="1920x1920"
-elif gen_image_apiyi "gpt-image-2-all"            "1280x1280" "$OUTPUT_PATH"; then MODEL_USED="gpt-image-2-all"; SIZE="1280x1280"
+# Logo: doubao at 1920x1920 → fallback to MODEL_GPT at 1280x1280
+if   gen_image_apiyi "$MODEL_DOUBAO" "1920x1920" "$OUTPUT_PATH"; then MODEL_USED="$MODEL_DOUBAO"; SIZE="1920x1920"
+elif gen_image_apiyi "$MODEL_GPT"    "1280x1280" "$OUTPUT_PATH"; then MODEL_USED="$MODEL_GPT";    SIZE="1280x1280"
 else echo "LOGO_GENERATION_FAILED"; exit 1
 fi
 ```
@@ -152,9 +175,9 @@ for ITEM in "${ITEMS[@]}"; do
     OUTPUT_PATH="/tmp/image_${ITEM}.png"
     FINAL_PATH="output/${ITEM}.webp"
 
-    if   gen_image_apiyi "gpt-image-2-all"            "848x1280"  "$OUTPUT_PATH"; then MODEL_USED="gpt-image-2-all"
-    elif gen_image_apiyi "doubao-seedream-5-0-260128" "1664x2496" "$OUTPUT_PATH"; then MODEL_USED="doubao-seedream-5-0-260128"
-    elif gen_image_apiyi "nano-banana-pro"            "1024x1024" "$OUTPUT_PATH"; then MODEL_USED="nano-banana-pro"
+    if   gen_image_apiyi "$MODEL_GPT"    "848x1280"  "$OUTPUT_PATH"; then MODEL_USED="$MODEL_GPT"
+    elif gen_image_apiyi "$MODEL_DOUBAO" "1664x2496" "$OUTPUT_PATH"; then MODEL_USED="$MODEL_DOUBAO"
+    elif gen_image_apiyi "$MODEL_NANO"   "1024x1024" "$OUTPUT_PATH"; then MODEL_USED="$MODEL_NANO"
     else echo "⚠ $ITEM — all models failed"; exit 0; fi
 
     # post-process: resize + convert (see references/post-process.md)

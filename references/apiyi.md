@@ -18,6 +18,15 @@ Content-Type: application/json
 
 ---
 
+## Environment Variables
+
+| Variable | Values | Default | Effect |
+|---|---|---|---|
+| `APIYI_API_KEY` | your key | — | **Required.** Auth bearer token. |
+| `APIYI_MODEL` | `gpt` \| `doubao` \| `nano` | `gpt` | Friendly alias for the primary model slot. Resolved to actual IDs in `references/generation.md`. |
+
+---
+
 ## Models
 
 ### gpt-image-2-all
