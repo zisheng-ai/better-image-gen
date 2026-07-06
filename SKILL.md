@@ -1,5 +1,5 @@
 ---
-name: apiyi-image-gen
+name: zisheng-image-gen
 description: Use when generating, creating, or editing images, photos, illustrations, covers, banners, logos, icons, wallpapers, visual assets, or Chinese image requests such as 生成图片、画图、出图、做封面、做图标、生成插图、壁纸, using the apiyi OpenAI-compatible image API.
 ---
 

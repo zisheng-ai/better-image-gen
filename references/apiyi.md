@@ -123,6 +123,43 @@ Use `gpt-image-1` only when a non-preset aspect ratio is required or when transp
 
 ---
 
+### Gemini Image Models
+
+Three tiers, all with free-form sizes (no preset table) and raw `b64_json` response (no `data:` prefix).
+
+| Model ID | Tier | Best for |
+|---|---|---|
+| `gemini-3.1-flash-image-4k` | Flash 4K | True 4K output (~9 MB PNG); wallpapers, hero images |
+| `gemini-3-pro-image` | Pro | Highest quality; instruction-following, complex scenes |
+| `gemini-3.1-flash-image` | Flash | Balanced speed/quality; general use |
+| `gemini-3.1-flash-lite-image` | Lite | Fastest / cheapest; drafts |
+
+**Key differences from GPT / Doubao:**
+- Free-form sizes — any `WxH` works (no preset constraints)
+- No watermark
+- No content prefix in b64 — decode directly without stripping
+
+**Minimal request:**
+
+```bash
+curl "https://api.apiyi.com/v1/images/generations" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $APIYI_API_KEY" \
+  --max-time 300 \
+  -d '{
+    "model": "gemini-3.1-flash-image-4k",
+    "prompt": "...",
+    "size": "3840x2160"
+  }'
+```
+
+**When to use Gemini:**
+- 4K wallpapers: `gemini-3.1-flash-image-4k` — only model that reliably returns true 4K resolution
+- Complex prompt adherence: `gemini-3-pro-image`
+- Fast draft or batch jobs: `gemini-3.1-flash-lite-image`
+
+---
+
 ## Error Handling
 
 | Code | Meaning | Action |

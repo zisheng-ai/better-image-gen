@@ -1,6 +1,6 @@
-# apiyi-image-gen
+# zisheng-image-gen
 
-A Claude Code skill for AI image generation via [apiyi](https://api.apiyi.com/register/?aff_code=ijv5) — a unified proxy that exposes GPT Image 2, Doubao SeedDream, and other models under a single OpenAI-compatible API.
+A Claude Code skill for AI image generation via [apiyi](https://api.apiyi.com/register/?aff_code=ijv5) — a unified proxy that exposes GPT Image 2, Doubao SeedDream, Gemini, and other models under a single OpenAI-compatible API.
 
 ## Features
 
