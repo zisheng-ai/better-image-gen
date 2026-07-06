@@ -60,9 +60,9 @@ Intermediate PNGs are written to `/tmp/` and deleted after conversion.
 
 | Model | ID | Best for |
 |---|---|---|
-| GPT Image 2 | `gpt-image-2-all` | Photorealistic photos and portraits |
-| Doubao SeedDream | `doubao-seedream-5-0-260128` | High-allure content; logos at 1920×1920 |
-| Nano Banana | `nano-banana-pro` | Blank prevention only |
+| gpt-image-2 | `gpt-image-2-all` | Photorealistic photos and portraits |
+| doubao-seedream-5 | `doubao-seedream-5-0-260128` | High-allure content; logos at 1920×1920 |
+| nano-banana-pro | `nano-banana-pro` | Blank prevention only |
 
 See `references/apiyi.md` for pricing, size tables, and error codes.
 
