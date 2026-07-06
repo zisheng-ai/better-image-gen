@@ -1,9 +1,9 @@
 ---
-name: zisheng-image-gen
+name: better-image-gen
 description: Use when generating, creating, or editing images, photos, illustrations, covers, banners, logos, icons, wallpapers, visual assets, or Chinese image requests such as 生成图片、画图、出图、做封面、做图标、生成插图、壁纸, using the apiyi OpenAI-compatible image API.
 ---
 
-# zisheng-image-gen
+# better-image-gen
 
 AI image generation skill powered by [apiyi](https://api.apiyi.com/register/?aff_code=ijv5) — a unified proxy that exposes GPT Image 2, Gemini, Doubao SeedDream, and Nano Banana under a single OpenAI-compatible API.
 
@@ -75,6 +75,18 @@ Every generated image is:
 **Exception — Mac dynamic wallpaper:** generate 2 PNG frames (light + dark), package into `.heic` with `apple_desktop:apr` XMP. Do NOT convert to WebP. Follow `references/dynamic-wallpaper.md` for the full pipeline.
 
 Post-process steps (resize, doubao watermark crop, WebP conversion) are in `references/post-process.md`.
+
+---
+
+## Transparent Logo / Icon Hard Constraint
+
+When the user asks for a logo, icon, app icon source art, favicon, mascot sticker, badge, cutout, or any asset that should have a transparent background:
+
+- The prompt MUST explicitly request: `transparent background, alpha channel, isolated subject, no background layer`.
+- The negative prompt / avoidance text MUST explicitly forbid: `black background, white background, solid square background, rounded rectangle container, app tile, mockup frame, drop shadow outside the subject, border, canvas, backdrop, wallpaper, scene`.
+- Do NOT ask for "a rounded app icon" unless the user explicitly wants a baked icon tile. For macOS/iOS source art, request the artwork only on transparent background; the OS or app should apply the mask later.
+- If the model still returns black/white corners or a rounded square tile, post-process it before delivery using edge-connected background removal. For Argos-style black-corner PNGs, prefer the local tool `swift run transparentize-black-background input.png output.png --threshold 18` from `/Users/zisheng/github/argos`, then verify the output has alpha.
+- For deliverables where transparency matters, prefer PNG/WebP with alpha and verify with `sips -g hasAlpha <file>` or an equivalent pixel-alpha check before saying it is transparent.
 
 ---
 

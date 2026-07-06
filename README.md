@@ -1,4 +1,4 @@
-# zisheng-image-gen
+# better-image-gen
 
 **A Claude Code skill for AI image generation** — powered by [apiyi](https://api.apiyi.com/register/?aff_code=ijv5), a unified proxy that routes to GPT Image 2, Gemini, Doubao SeedDream, and Nano Banana under a single OpenAI-compatible API.
 

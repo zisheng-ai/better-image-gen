@@ -105,6 +105,23 @@ rm -f "$OUTPUT_PATH"
 
 ## Logo Post-Processing
 
+For logo/icon/favicons where transparency is expected, verify alpha before resizing:
+
+```bash
+sips -g hasAlpha "$OUTPUT_PATH"
+```
+
+If the output has black/white corners, a solid square background, or a baked rounded rectangle tile, remove only the edge-connected background before resizing. For the Argos local tool:
+
+```bash
+swift run --package-path /Users/zisheng/github/argos transparentize-black-background \
+  "$OUTPUT_PATH" /tmp/logo-transparent.png --threshold 18
+mv /tmp/logo-transparent.png "$OUTPUT_PATH"
+sips -g hasAlpha "$OUTPUT_PATH"
+```
+
+Do not use a global color erase on logos by default; it can damage black/white details inside the mark. Prefer edge-connected background removal so interior dark/light details remain opaque.
+
 After generating a logo or favicon at 1920×1920 (doubao) or 1280×1280 (GPT):
 
 ```bash

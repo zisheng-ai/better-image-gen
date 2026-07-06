@@ -1,4 +1,4 @@
-# zisheng-image-gen
+# better-image-gen
 
 **Claude Code AI 生图技能** — 由 [apiyi](https://api.apiyi.com/register/?aff_code=ijv5) 驱动，一个 Key 调用 GPT Image 2、Gemini、Doubao SeedDream、Nano Banana，OpenAI 兼容接口。
 

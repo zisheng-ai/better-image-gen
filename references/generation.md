@@ -158,6 +158,16 @@ osascript -e "tell application \"Finder\" to set desktop picture to POSIX file \
 
 Doubao minimum: 3,686,400 px. Use `1920×1920` for square logos (exactly meets the floor). `1024×1024` is below the floor — falls through to GPT automatically.
 
+Before generation, rewrite the user's logo/icon prompt so transparency cannot be ambiguous. Append this block unless the user explicitly asked for a filled app tile or mockup:
+
+```text
+Transparent-background source artwork. Isolated subject only. Preserve alpha channel. No background layer.
+Avoid: black background, white background, solid square background, rounded rectangle container, app icon tile, mockup frame, border, drop shadow outside the subject, canvas, backdrop, wallpaper, scene.
+The output must be usable as a cutout logo/icon asset; the OS or app will apply any rounded mask later.
+```
+
+If the user explicitly asks for a macOS/iOS app icon, distinguish source art from final masked app icon. Generate source art with transparent background first unless they clearly want the rounded tile baked into the pixels.
+
 ```bash
 # Logo: doubao at 1920x1920 → fallback to MODEL_GPT at 1280x1280
 if   gen_image_apiyi "$MODEL_DOUBAO" "1920x1920" "$OUTPUT_PATH"; then MODEL_USED="$MODEL_DOUBAO"; SIZE="1920x1920"
