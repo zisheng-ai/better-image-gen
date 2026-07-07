@@ -23,7 +23,7 @@ Content-Type: application/json
 | Variable | Values | Default | Effect |
 |---|---|---|---|
 | `APIYI_API_KEY` | your key | — | **Required.** Auth bearer token. |
-| `APIYI_MODEL` | `gpt` \| `doubao` \| `nano` | `gpt` | Friendly alias for the primary model slot. Resolved to actual IDs in `references/generation.md`. |
+| `APIYI_MODEL` | `gpt` \| `gemini` \| `doubao` \| `nano` | `gpt` | Friendly alias for the primary model slot. Resolved to actual IDs in `references/generation.md`. |
 
 ---
 

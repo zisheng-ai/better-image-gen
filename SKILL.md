@@ -68,7 +68,18 @@ Full model specs are in `references/apiyi.md`.
 Every generated image is:
 - **Format:** lossy WebP (q78 for covers/hero images, q72 for inline illustrations)
 - **Intermediate:** PNG written to `/tmp/` — deleted after WebP conversion
-- **Deliverable:** `.webp` + optional `.json` metadata file (model, size, prompt)
+- **Deliverable:** final image + required `.json` metadata file (model, requested size, actual resolution, file size, generation time, post-processing notes, prompt)
+
+After every generation task finishes, list every output image in the final response with:
+- file path
+- actual resolution
+- generation model
+- requested size
+- generation time
+- output format and file size
+- metadata JSON path
+
+Use the summary helpers in `references/generation.md`; do not rely on memory or terminal logs for image metadata.
 
 **Exception — Mac static wallpaper:** save as lossless PNG (`wallpaper.png`). Do NOT convert to WebP. Move directly: `mv "$OUTPUT_PATH" "$OUT_DIR/wallpaper.png"`.
 

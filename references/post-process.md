@@ -157,10 +157,12 @@ PROMPT="photorealistic portrait, shot on Canon EOS R5 with 85mm f/1.4 lens, ..."
 
 # 2. Generate
 OUTPUT_PATH="/tmp/image_output.png"
-if   gen_image_apiyi "gpt-image-2-all"            "848x1280"  "$OUTPUT_PATH"; then MODEL_USED="gpt-image-2-all"
-elif gen_image_apiyi "doubao-seedream-5-0-260128" "1664x2496" "$OUTPUT_PATH"; then MODEL_USED="doubao-seedream-5-0-260128"
-elif gen_image_apiyi "nano-banana-pro"            "1024x1024" "$OUTPUT_PATH"; then MODEL_USED="nano-banana-pro"
+if   GEN_LOG=$(gen_image_apiyi "gpt-image-2-all"            "848x1280"  "$OUTPUT_PATH"); then MODEL_USED="gpt-image-2-all";            SIZE="848x1280"
+elif GEN_LOG=$(gen_image_apiyi "doubao-seedream-5-0-260128" "1664x2496" "$OUTPUT_PATH"); then MODEL_USED="doubao-seedream-5-0-260128"; SIZE="1664x2496"
+elif GEN_LOG=$(gen_image_apiyi "nano-banana-pro"            "1024x1024" "$OUTPUT_PATH"); then MODEL_USED="nano-banana-pro";            SIZE="1024x1024"
 else echo "ALL_MODELS_FAILED"; exit 1; fi
+GENERATION_MS=$(printf '%s\n' "$GEN_LOG" | awk -F: '/^ELAPSED_MS:/{v=$2} END{print v+0}')
+RESPONSE_FORMAT=$(printf '%s\n' "$GEN_LOG" | awk -F: '/^RESPONSE_FORMAT:/{v=$2} END{print v}')
 
 # 3. Post-process by model
 OUT_DIR="$HOME/.zisheng-ai"
@@ -168,23 +170,26 @@ mkdir -p "$OUT_DIR"
 FINAL="$OUT_DIR/image.webp"
 case "$MODEL_USED" in
   gpt-image-2-all)
+    POSTPROCESS_NOTE="direct webp q78"
     to_webp "$OUTPUT_PATH" "$FINAL" 78 ;;
   doubao-seedream-5-0-260128)
     h=$(python3 -c "from PIL import Image; print(Image.open('$OUTPUT_PATH').size[1])")
     w=$(python3 -c "from PIL import Image; print(Image.open('$OUTPUT_PATH').size[0])")
     sips -c $((h * 93 / 100)) $w "$OUTPUT_PATH"
     sips -z 1280 848 "$OUTPUT_PATH"
+    POSTPROCESS_NOTE="crop bottom 7 percent, resize 848x1280, webp q78"
     to_webp "$OUTPUT_PATH" "$FINAL" 78 ;;
   nano-banana-pro)
     sips -c 1024 683 "$OUTPUT_PATH"
     sips -z 1280 848 "$OUTPUT_PATH"
+    POSTPROCESS_NOTE="center crop 2:3, resize 848x1280, webp q78"
     to_webp "$OUTPUT_PATH" "$FINAL" 78 ;;
 esac
 rm -f "$OUTPUT_PATH"
 
 # 4. Save metadata
-PROMPT_JSON=$(printf '%s' "$PROMPT" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read().strip()))')
-printf '{"model":"%s","size":"%s","prompt":%s}\n' "$MODEL_USED" "848x1280" "$PROMPT_JSON" > "$OUT_DIR/image.json"
+write_image_metadata "$FINAL" "$OUT_DIR/image.json" "$MODEL_USED" "$SIZE" "$GENERATION_MS" "$RESPONSE_FORMAT" "$POSTPROCESS_NOTE"
+print_image_summary "$OUT_DIR/image.json"
 
 echo "✓ $FINAL ($(stat -f%z "$FINAL" 2>/dev/null || stat -c%s "$FINAL") bytes)"
 open "$FINAL"
