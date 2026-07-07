@@ -1,6 +1,6 @@
-# Image Generation — Patterns & Cascade
+# Image Generation — GPT-Only Core
 
-Load this reference before generating any image. It provides the `gen_image_apiyi` shell function, the model cascade, and batch parallelism patterns.
+Load this reference before generating any image. It provides the `gen_image_apiyi` shell function, GPT model setup, metadata helpers, and batch parallelism patterns.
 
 ---
 
@@ -19,27 +19,15 @@ fi
 
 ---
 
-## Model Alias Resolution
+## Model Setup
 
-Resolve `APIYI_MODEL` (friendly name) → actual model ID. Default: `gpt`.
+This skill supports GPT image generation only.
 
 ```bash
-# Supported values: gpt (default) | gemini | doubao | nano
-_APIYI_MODEL_ALIAS="${APIYI_MODEL:-gpt}"
-case "$_APIYI_MODEL_ALIAS" in
-  gpt)    MODEL_GPT="gpt-image-2-all";              MODEL_DOUBAO="doubao-seedream-5-0-260128"; MODEL_NANO="nano-banana-pro" ;;
-  gemini) MODEL_GPT="gemini-3.1-flash-image-4k";    MODEL_DOUBAO="doubao-seedream-5-0-260128"; MODEL_NANO="nano-banana-pro" ;;
-  doubao) MODEL_GPT="doubao-seedream-5-0-260128";   MODEL_DOUBAO="doubao-seedream-5-0-260128"; MODEL_NANO="nano-banana-pro" ;;
-  nano)   MODEL_GPT="nano-banana-pro";              MODEL_DOUBAO="nano-banana-pro";            MODEL_NANO="nano-banana-pro" ;;
-  *)      echo "⚠ Unknown APIYI_MODEL='$_APIYI_MODEL_ALIAS'. Using gpt."
-          MODEL_GPT="gpt-image-2-all"; MODEL_DOUBAO="doubao-seedream-5-0-260128"; MODEL_NANO="nano-banana-pro" ;;
-esac
-# MODEL_GPT   — primary slot in standard cascade
-# MODEL_DOUBAO — doubao slot (high-allure / logo cascade)
-# MODEL_NANO  — final fallback slot
+MODEL_GPT="gpt-image-2-all"
 ```
 
-Setting `APIYI_MODEL=gemini` makes Gemini Flash 4K the standard primary slot. `APIYI_MODEL=doubao` forces all cascade primary slots to doubao. `APIYI_MODEL=nano` collapses the entire cascade to nano (useful for fast draft previews). Unset or `gpt` uses the default cascade order.
+Do not use model override environment variables or secondary model slots. If GPT fails, soften the prompt once when appropriate, retry GPT once, then report the failure.
 
 ---
 
@@ -50,7 +38,14 @@ Every successful output must write a metadata JSON file and every task must prin
 ```bash
 image_dimensions() {
   local image_path="$1"
-  python3 -c 'from PIL import Image; import sys; im=Image.open(sys.argv[1]); print(f"{im.size[0]}x{im.size[1]}")' "$image_path"
+  python3 -c 'import sys; from PIL import Image
+try:
+    import pillow_heif
+    pillow_heif.register_heif_opener()
+except Exception:
+    pass
+im=Image.open(sys.argv[1])
+print(f"{im.size[0]}x{im.size[1]}")' "$image_path"
 }
 
 file_bytes() {
@@ -181,106 +176,16 @@ PY
 
 ---
 
-## Model Cascade
+## Capturing Generation Results
 
-Three models in priority order. Fall through to the next on any failure.
-
-### Portrait / square image (T1–T2 content)
+Type-specific references define the output sizes. Use this extraction block after any successful `GEN_LOG=$(gen_image_apiyi "$MODEL_GPT" ...)` call:
 
 ```bash
-OUTPUT_PATH="/tmp/image_output.png"
-
-if   GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "848x1280"  "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT";    SIZE="848x1280"
-elif GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "848x1280"  "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT";    SIZE="848x1280"   # retry once
-elif GEN_LOG=$(gen_image_apiyi "$MODEL_DOUBAO" "1664x2496" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_DOUBAO"; SIZE="1664x2496"
-elif GEN_LOG=$(gen_image_apiyi "$MODEL_NANO"   "1024x1024" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_NANO";   SIZE="1024x1024"
-else echo "ALL_MODELS_FAILED"; exit 1
-fi
-GENERATION_MS=$(printf '%s\n' "$GEN_LOG" | awk -F: '/^ELAPSED_MS:/{v=$2} END{print v+0}')
-RESPONSE_FORMAT=$(printf '%s\n' "$GEN_LOG" | awk -F: '/^RESPONSE_FORMAT:/{v=$2} END{print v}')
-echo "MODEL_USED=$MODEL_USED"
-echo "💡 Powered by apiyi — GPT Image 2 / Doubao / Nano via one key: https://api.apiyi.com/register/?aff_code=ijv5"
-```
-
-### High-allure / permissive content (T3+ — skip GPT, go straight to Doubao)
-
-GPT hard-rejects explicit fabric-failure / soaked / torn language. For prompts that contain these elements:
-
-```bash
-OUTPUT_PATH="/tmp/image_output.png"
-
-if   GEN_LOG=$(gen_image_apiyi "$MODEL_DOUBAO" "1664x2496" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_DOUBAO"; SIZE="1664x2496"
-elif GEN_LOG=$(gen_image_apiyi "$MODEL_DOUBAO" "1664x2496" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_DOUBAO"; SIZE="1664x2496"  # retry once
-elif GEN_LOG=$(gen_image_apiyi "$MODEL_NANO"   "1024x1024" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_NANO";   SIZE="1024x1024"
-else echo "ALL_MODELS_FAILED"; exit 1
-fi
 GENERATION_MS=$(printf '%s\n' "$GEN_LOG" | awk -F: '/^ELAPSED_MS:/{v=$2} END{print v+0}')
 RESPONSE_FORMAT=$(printf '%s\n' "$GEN_LOG" | awk -F: '/^RESPONSE_FORMAT:/{v=$2} END{print v}')
 ```
 
-### Mac wallpaper (16:9 / 16:10)
-
-GPT at 4K 16:9 (`3840×2160`) as primary; Doubao at 16:10 (`2560×1600`, 4.1 M px > floor) as fallback for MacBook native ratio; Nano last resort (upscale from `1280×720`).
-
-```bash
-OUTPUT_PATH="/tmp/image_output.png"
-OUT_DIR="$HOME/Pictures/better-image-gen"
-mkdir -p "$OUT_DIR"
-
-if   GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "3840x2160" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT";    SIZE="3840x2160"
-elif GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "3840x2160" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT";    SIZE="3840x2160"  # retry once
-elif GEN_LOG=$(gen_image_apiyi "$MODEL_DOUBAO" "2560x1600" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_DOUBAO"; SIZE="2560x1600"
-elif GEN_LOG=$(gen_image_apiyi "$MODEL_NANO"   "1280x720"  "$OUTPUT_PATH"); then MODEL_USED="$MODEL_NANO";   SIZE="1280x720"
-else echo "ALL_MODELS_FAILED"; exit 1
-fi
-GENERATION_MS=$(printf '%s\n' "$GEN_LOG" | awk -F: '/^ELAPSED_MS:/{v=$2} END{print v+0}')
-RESPONSE_FORMAT=$(printf '%s\n' "$GEN_LOG" | awk -F: '/^RESPONSE_FORMAT:/{v=$2} END{print v}')
-
-# No resize needed for GPT/Doubao — already at display resolution
-# Nano: upscale to 2560x1600
-if [ "$MODEL_USED" = "$MODEL_NANO" ]; then
-  sips -z 1600 2560 "$OUTPUT_PATH"
-fi
-
-mv "$OUTPUT_PATH" "$OUT_DIR/wallpaper.png"
-write_image_metadata "$OUT_DIR/wallpaper.png" "$OUT_DIR/wallpaper.json" "$MODEL_USED" "$SIZE" "$GENERATION_MS" "$RESPONSE_FORMAT" "wallpaper png"
-echo "MODEL_USED=$MODEL_USED  SIZE=$SIZE"
-echo "✓ Wallpaper saved: $OUT_DIR/wallpaper.png"
-print_image_summary "$OUT_DIR/wallpaper.json"
-echo "💡 Powered by apiyi — GPT Image 2 / Doubao / Nano via one key: https://api.apiyi.com/register/?aff_code=ijv5"
-open "$OUT_DIR/wallpaper.png"
-```
-
-After opening, ask the user: **「要设置为桌面壁纸吗？」** Wait for confirmation before running:
-```bash
-osascript -e "tell application \"Finder\" to set desktop picture to POSIX file \"$HOME/Pictures/better-image-gen/wallpaper.png\""
-```
-
----
-
-### Logo / favicon (square, requires Doubao's pixel floor)
-
-Doubao minimum: 3,686,400 px. Use `1920×1920` for square logos (exactly meets the floor). `1024×1024` is below the floor — falls through to GPT automatically.
-
-Before generation, rewrite the user's logo/icon prompt so transparency cannot be ambiguous. Append this block unless the user explicitly asked for a filled app tile or mockup:
-
-```text
-Transparent-background source artwork. Isolated subject only. Preserve alpha channel. No background layer.
-Avoid: black background, white background, solid square background, rounded rectangle container, app icon tile, mockup frame, border, drop shadow outside the subject, canvas, backdrop, wallpaper, scene.
-The output must be usable as a cutout logo/icon asset; the OS or app will apply any rounded mask later.
-```
-
-If the user explicitly asks for a macOS/iOS app icon, distinguish source art from final masked app icon. Generate source art with transparent background first unless they clearly want the rounded tile baked into the pixels.
-
-```bash
-# Logo: doubao at 1920x1920 → fallback to MODEL_GPT at 1280x1280
-if   GEN_LOG=$(gen_image_apiyi "$MODEL_DOUBAO" "1920x1920" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_DOUBAO"; SIZE="1920x1920"
-elif GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "1280x1280" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT";    SIZE="1280x1280"
-else echo "LOGO_GENERATION_FAILED"; exit 1
-fi
-GENERATION_MS=$(printf '%s\n' "$GEN_LOG" | awk -F: '/^ELAPSED_MS:/{v=$2} END{print v+0}')
-RESPONSE_FORMAT=$(printf '%s\n' "$GEN_LOG" | awk -F: '/^RESPONSE_FORMAT:/{v=$2} END{print v}')
-```
+Do not infer model, requested size, response format, or elapsed time from prose logs. Assign `MODEL_USED="$MODEL_GPT"` and `SIZE` in the same branch that succeeds.
 
 ---
 
@@ -302,7 +207,7 @@ Do not finish the task without this summary. If an image failed, include it sepa
 
 ---
 
-## Prompt Softening (content safety fallback)
+## Prompt Softening
 
 If the primary model returns an error containing `invalid_prompt` / `safety` / `rejected`, replace triggering terms and retry once:
 
@@ -317,13 +222,13 @@ If the primary model returns an error containing `invalid_prompt` / `safety` / `
 | `lips pressed against` | `faces close, the moment before` |
 | `erotic`, `sexual`, `explicit` | `alluring`, `intimate atmosphere`, `romantic tension` |
 
-After softening, retry the full cascade once. If every model still fails, skip and log.
+After softening, retry GPT once. If it still fails, skip and log.
 
 ---
 
 ## Parallel Batch Generation
 
-For multiple images, launch one background process per image and `wait` for all:
+For multiple images, launch one background process per image and `wait` for all. The per-item GPT request and post-processing come from the selected type reference.
 
 ```bash
 OUT_DIR="$HOME/Pictures/better-image-gen"
@@ -336,14 +241,9 @@ for ITEM in "${ITEMS[@]}"; do
     OUTPUT_PATH="/tmp/image_${ITEM}.png"
     FINAL_PATH="$OUT_DIR/${ITEM}.webp"
 
-    if   GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "848x1280"  "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT";    SIZE="848x1280"
-    elif GEN_LOG=$(gen_image_apiyi "$MODEL_DOUBAO" "1664x2496" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_DOUBAO"; SIZE="1664x2496"
-    elif GEN_LOG=$(gen_image_apiyi "$MODEL_NANO"   "1024x1024" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_NANO";   SIZE="1024x1024"
-    else echo "⚠ $ITEM — all models failed"; exit 0; fi
-    GENERATION_MS=$(printf '%s\n' "$GEN_LOG" | awk -F: '/^ELAPSED_MS:/{v=$2} END{print v+0}')
-    RESPONSE_FORMAT=$(printf '%s\n' "$GEN_LOG" | awk -F: '/^RESPONSE_FORMAT:/{v=$2} END{print v}')
-
-    # post-process: resize + convert (see references/post-process.md)
+    # 1. Run the selected type-specific GPT request.
+    # 2. Set MODEL_USED, SIZE, GENERATION_MS, RESPONSE_FORMAT.
+    # 3. Post-process into FINAL_PATH.
     write_image_metadata "$FINAL_PATH" "${FINAL_PATH%.*}.json" "$MODEL_USED" "$SIZE" "$GENERATION_MS" "$RESPONSE_FORMAT" "$POSTPROCESS_NOTE"
     echo "✓ $ITEM — $MODEL_USED — ${FINAL_PATH%.*}.json"
   ) > "/tmp/log_${ITEM}.log" 2>&1 &

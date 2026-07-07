@@ -1,6 +1,6 @@
-# APIyi — API Reference
+# APIyi — GPT Image API Reference
 
-Unified image generation proxy exposing multiple models under a single OpenAI-compatible endpoint.
+OpenAI-compatible image endpoint used by this skill. This skill only uses `gpt-image-2-all`.
 
 - **Docs:** https://docs.apiyi.com/
 - **Sign up:** https://api.apiyi.com/register/?aff_code=ijv5
@@ -23,7 +23,6 @@ Content-Type: application/json
 | Variable | Values | Default | Effect |
 |---|---|---|---|
 | `APIYI_API_KEY` | your key | — | **Required.** Auth bearer token. |
-| `APIYI_MODEL` | `gpt` \| `gemini` \| `doubao` \| `nano` | `gpt` | Friendly alias for the primary model slot. Resolved to actual IDs in `references/generation.md`. |
 
 ---
 
@@ -77,86 +76,6 @@ if b64.startswith("data:"):          # strip prefix if present
 with open("output.png", "wb") as f:
     f.write(base64.b64decode(b64))
 ```
-
----
-
-### doubao-seedream-5-0-260128
-
-- **Price:** lower than gpt-image-2-all
-- **Minimum pixel area:** 3,686,400 px (hard error below this floor). Use `1664×2496` for portrait, `1920×1920` for square.
-- **Sizes:** free-form; no preset table required
-- **Response:** `b64_json` (raw base64, **no** prefix) **or** `url` (CDN link, valid ~24 h)
-- **Watermark:** stamps `AI生成` in the bottom-right corner — must crop ~7 % from the bottom after download (see `references/post-process.md`)
-
-**Minimal request:**
-
-```bash
-curl "https://api.apiyi.com/v1/images/generations" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $APIYI_API_KEY" \
-  --max-time 300 \
-  -d '{
-    "model": "doubao-seedream-5-0-260128",
-    "prompt": "...",
-    "size": "1664x2496"
-  }'
-```
-
----
-
-### gpt-image-1
-
-- **Price:** $0.005–$0.052 / image (token-based)
-- **Sizes:** `1024×1024`, `1536×1024`, `1024×1536`, or `auto`
-- **Supports:** `quality` (low/medium/high/auto), `n` (1–10), `output_format` (png/jpeg/webp), `background` (transparent/opaque/auto)
-- **Response:** `url` (default) or `b64_json` (raw base64, no prefix)
-
-Use `gpt-image-1` only when a non-preset aspect ratio is required or when transparent backgrounds are needed.
-
----
-
-### nano-banana-pro
-
-- **Use:** terminal fallback / blank-prevention only
-- **Output:** square 1024×1024 — reframe to target aspect ratio after generation
-- **Content:** silently downgrades explicit or high-tier prompts to mild output; do not rely on it for high-allure images
-
----
-
-### Gemini Image Models
-
-Three tiers, all with free-form sizes (no preset table) and raw `b64_json` response (no `data:` prefix).
-
-| Model ID | Tier | Best for |
-|---|---|---|
-| `gemini-3.1-flash-image-4k` | Flash 4K | True 4K output (~9 MB PNG); wallpapers, hero images |
-| `gemini-3-pro-image` | Pro | Highest quality; instruction-following, complex scenes |
-| `gemini-3.1-flash-image` | Flash | Balanced speed/quality; general use |
-| `gemini-3.1-flash-lite-image` | Lite | Fastest / cheapest; drafts |
-
-**Key differences from GPT / Doubao:**
-- Free-form sizes — any `WxH` works (no preset constraints)
-- No watermark
-- No content prefix in b64 — decode directly without stripping
-
-**Minimal request:**
-
-```bash
-curl "https://api.apiyi.com/v1/images/generations" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $APIYI_API_KEY" \
-  --max-time 300 \
-  -d '{
-    "model": "gemini-3.1-flash-image-4k",
-    "prompt": "...",
-    "size": "3840x2160"
-  }'
-```
-
-**When to use Gemini:**
-- 4K wallpapers: `gemini-3.1-flash-image-4k` — only model that reliably returns true 4K resolution
-- Complex prompt adherence: `gemini-3-pro-image`
-- Fast draft or batch jobs: `gemini-3.1-flash-lite-image`
 
 ---
 

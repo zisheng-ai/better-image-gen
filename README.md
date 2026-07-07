@@ -1,6 +1,6 @@
 # better-image-gen
 
-**A Claude Code skill for AI image generation** — powered by [apiyi](https://api.apiyi.com/register/?aff_code=ijv5), a unified proxy that routes to GPT Image 2, Gemini, Doubao SeedDream, and Nano Banana under a single OpenAI-compatible API.
+**A Claude Code skill for AI image generation** — powered by [apiyi](https://api.apiyi.com/register/?aff_code=ijv5), using the OpenAI-compatible `gpt-image-2-all` image API.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude_Code-Skill-blueviolet)](https://claude.ai/code)
@@ -18,30 +18,21 @@ Invoke naturally in Claude Code — no commands, no config per-session:
 Generate a cinematic portrait of a woman in a Tokyo street at night
 Make a square logo for my app, dark theme, minimalist
 Create 8 product images in parallel for my store
+Make a RunCat-style menu bar sprite loop of a tiny robot running
 做一张 Mac 动态壁纸，深海珊瑚礁，白天/夜晚切换
 ```
 
-The skill picks the right model, handles fallbacks, post-processes output, and saves files to `~/Pictures/better-image-gen/`.
+The skill routes each image type to the right GPT workflow, post-processes output, and saves files to `~/Pictures/better-image-gen/`.
 
 ---
 
-## Models
+## Model
 
-Four model families, one API key.
+One model, one API key.
 
-| Alias | Model | Best for | Sizes |
-|-------|-------|----------|-------|
-| `gpt` *(default)* | `gpt-image-2-all` | Photorealistic photos, portraits, product shots | 30 presets (see below) |
-| `gemini` | `gemini-3.1-flash-image-4k` | True 4K output, complex prompts, wallpapers | Free-form |
-| `doubao` | `doubao-seedream-5-0-260128` | High-allure content, logos at 1920×1920 | Free-form (≥ 3.7 MP) |
-| `nano` | `nano-banana-pro` | Fast drafts, terminal fallback | 1024×1024 |
-
-**Switch models:**
-```bash
-export APIYI_MODEL=gemini    # use Gemini as primary
-export APIYI_MODEL=doubao    # use Doubao as primary
-unset  APIYI_MODEL           # reset to default (gpt)
-```
+| Model | Best for | Sizes |
+|-------|----------|-------|
+| `gpt-image-2-all` | Photorealistic photos, portraits, product shots, wallpapers, sprite sheets | 30 presets |
 
 **GPT size presets (16:9 tier):**
 
@@ -57,14 +48,15 @@ Full 30-preset table in `references/apiyi.md`.
 
 ## Use Cases
 
-| Request | Model cascade | Output |
+| Request | Model | Output |
 |---------|--------------|--------|
-| Portrait / illustration | GPT → Doubao → Nano | `.webp` q78, ≤ 300 KB |
-| Logo / favicon | Doubao → GPT | `.png` (pngquant), ≤ 100 KB |
-| Mac static wallpaper (4K) | GPT → Gemini → Doubao → Nano | `wallpaper.png` (lossless PNG) |
-| Mac dynamic wallpaper | GPT → Gemini → Doubao → Nano | `wallpaper-apr.heic` (2-frame, Light/Dark) |
-| High-allure content (T3+) | Doubao → Nano | `.webp` q78 |
-| Batch (N images) | per-image cascade | N × `.webp`, generated in parallel |
+| Portrait / illustration | GPT | `.webp` q78, ≤ 300 KB |
+| Logo / favicon | GPT | `.png` (pngquant), ≤ 100 KB |
+| Mac static wallpaper (4K) | GPT | `wallpaper.png` (lossless PNG) |
+| Mac dynamic wallpaper | GPT | `wallpaper-apr.heic` (2-frame, Light/Dark) |
+| Sprite loop | GPT | numbered PNG frames + `preview.gif` |
+| High-allure content (T3+) | GPT with softened prompt if needed | `.webp` q78 |
+| Batch (N images) | GPT per image | N × `.webp`, generated in parallel |
 
 ---
 
@@ -85,6 +77,14 @@ Make a dynamic wallpaper — underwater coral reef, day and night
 
 ---
 
+## Sprite Loop
+
+Use for RunCat-like frame animations, menu-bar status mascots, loading loops, and tiny app animations. The skill generates a sprite sheet, splits it into numbered PNG frames, writes `manifest.json`, and opens `preview.gif`.
+
+**Output:** `~/Pictures/better-image-gen/sprite-loop/{name}/`
+
+---
+
 ## Output Convention
 
 | Asset | Format | Location |
@@ -92,6 +92,7 @@ Make a dynamic wallpaper — underwater coral reef, day and night
 | Cover / illustration | Lossy WebP q78 | `~/Pictures/better-image-gen/{name}.webp` |
 | Mac static wallpaper | Lossless PNG | `~/Pictures/better-image-gen/wallpaper.png` |
 | Mac dynamic wallpaper | 2-frame HEIC | `~/Pictures/better-image-gen/dynamic-wallpaper/wallpaper-apr.heic` |
+| Sprite loop | PNG frames + preview GIF | `~/Pictures/better-image-gen/sprite-loop/{name}/` |
 | Logo | PNG (pngquant) | project-local |
 | Metadata | JSON | alongside each image |
 
@@ -128,10 +129,15 @@ pip3 install pillow-heif
 ```
 SKILL.md                      ← skill entry point & trigger rules
 references/
-  apiyi.md                    ← API auth, all model specs, size tables, error codes
-  generation.md               ← gen_image_apiyi function, cascade logic, batch pattern
-  post-process.md             ← WebP conversion, Doubao watermark crop, resize
+  apiyi.md                    ← API auth, GPT model specs, size tables, error codes
+  generation.md               ← API key check, model aliases, gen_image_apiyi, metadata helpers
+  post-process.md             ← WebP conversion, resize, PNG compression
+  portrait.md                 ← portraits, covers, banners, general single images
+  high-allure.md              ← suggestive romance/editorial images
+  logo-icon.md                ← transparent logos, icons, favicons, cutouts
+  static-wallpaper.md         ← static wallpaper PNG pipeline
   dynamic-wallpaper.md        ← Mac dynamic wallpaper: generation + HEIC packaging
+  sprite-loop.md              ← RunCat-like frame animation assets
 ```
 
 ---

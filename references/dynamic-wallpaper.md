@@ -46,24 +46,31 @@ mkdir -p "$OUT_DIR"
 (
   export PROMPT="$PROMPT_LIGHT"
   OUTPUT_PATH="/tmp/dw_light.png"
-  if   gen_image_apiyi "$MODEL_GPT"    "3840x2160" "$OUTPUT_PATH"; then echo "✓ light (gpt)"
-  elif gen_image_apiyi "$MODEL_DOUBAO" "2560x1600" "$OUTPUT_PATH"; then echo "✓ light (doubao)"
-  elif gen_image_apiyi "$MODEL_NANO"   "1280x720"  "$OUTPUT_PATH"; then sips -z 1600 2560 "$OUTPUT_PATH" >/dev/null; echo "✓ light (nano)"
-  else echo "⚠ light — all failed"; fi
+  if   GEN_LOG=$(gen_image_apiyi "$MODEL_GPT" "3840x2160" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT"; SIZE="3840x2160"
+  elif GEN_LOG=$(gen_image_apiyi "$MODEL_GPT" "3840x2160" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT"; SIZE="3840x2160"
+  else echo "⚠ light — all failed"; exit 1; fi
+  GENERATION_MS=$(printf '%s\n' "$GEN_LOG" | awk -F: '/^ELAPSED_MS:/{v=$2} END{print v+0}')
+  RESPONSE_FORMAT=$(printf '%s\n' "$GEN_LOG" | awk -F: '/^RESPONSE_FORMAT:/{v=$2} END{print v}')
+  write_image_metadata "$OUTPUT_PATH" "$OUT_DIR/light-frame.json" "$MODEL_USED" "$SIZE" "$GENERATION_MS" "$RESPONSE_FORMAT" "dynamic wallpaper light frame png"
+  echo "✓ light — $MODEL_USED"
 ) > /tmp/dw_log_light.log 2>&1 &
 
 (
   export PROMPT="$PROMPT_DARK"
   OUTPUT_PATH="/tmp/dw_dark.png"
-  if   gen_image_apiyi "$MODEL_GPT"    "3840x2160" "$OUTPUT_PATH"; then echo "✓ dark (gpt)"
-  elif gen_image_apiyi "$MODEL_DOUBAO" "2560x1600" "$OUTPUT_PATH"; then echo "✓ dark (doubao)"
-  elif gen_image_apiyi "$MODEL_NANO"   "1280x720"  "$OUTPUT_PATH"; then sips -z 1600 2560 "$OUTPUT_PATH" >/dev/null; echo "✓ dark (nano)"
-  else echo "⚠ dark — all failed"; fi
+  if   GEN_LOG=$(gen_image_apiyi "$MODEL_GPT" "3840x2160" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT"; SIZE="3840x2160"
+  elif GEN_LOG=$(gen_image_apiyi "$MODEL_GPT" "3840x2160" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT"; SIZE="3840x2160"
+  else echo "⚠ dark — all failed"; exit 1; fi
+  GENERATION_MS=$(printf '%s\n' "$GEN_LOG" | awk -F: '/^ELAPSED_MS:/{v=$2} END{print v+0}')
+  RESPONSE_FORMAT=$(printf '%s\n' "$GEN_LOG" | awk -F: '/^RESPONSE_FORMAT:/{v=$2} END{print v}')
+  write_image_metadata "$OUTPUT_PATH" "$OUT_DIR/dark-frame.json" "$MODEL_USED" "$SIZE" "$GENERATION_MS" "$RESPONSE_FORMAT" "dynamic wallpaper dark frame png"
+  echo "✓ dark — $MODEL_USED"
 ) > /tmp/dw_log_dark.log 2>&1 &
 
 wait
 cat /tmp/dw_log_light.log /tmp/dw_log_dark.log
 rm -f /tmp/dw_log_*.log
+[ -f /tmp/dw_light.png ] && [ -f /tmp/dw_dark.png ] || { echo "DYNAMIC_WALLPAPER_FRAME_MISSING"; exit 1; }
 ```
 
 **Special case — user provides an existing image as one frame:**
@@ -114,6 +121,13 @@ xmp = (
 
 light.save(output, format="HEIF", save_all=True, append_images=[dark], xmp=xmp.encode())
 print(f"✓ {output}  ({os.path.getsize(output)//1024} KB)")
+```
+
+Write packaging metadata:
+```bash
+PROMPT="$THEME"
+write_image_metadata "$OUT_DIR/wallpaper-apr.heic" "$OUT_DIR/wallpaper-apr.json" "packaged-heic" "2-frame-apr" 0 "local-packaging" "2-frame HEIC with apple_desktop:apr metadata"
+print_image_summary "$OUT_DIR/light-frame.json" "$OUT_DIR/dark-frame.json" "$OUT_DIR/wallpaper-apr.json"
 ```
 
 Clean up:
