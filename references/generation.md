@@ -224,7 +224,7 @@ GPT at 4K 16:9 (`3840×2160`) as primary; Doubao at 16:10 (`2560×1600`, 4.1 M p
 
 ```bash
 OUTPUT_PATH="/tmp/image_output.png"
-OUT_DIR="$HOME/.zisheng-ai"
+OUT_DIR="$HOME/Pictures/better-image-gen"
 mkdir -p "$OUT_DIR"
 
 if   GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "3840x2160" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT";    SIZE="3840x2160"
@@ -253,7 +253,7 @@ open "$OUT_DIR/wallpaper.png"
 
 After opening, ask the user: **「要设置为桌面壁纸吗？」** Wait for confirmation before running:
 ```bash
-osascript -e "tell application \"Finder\" to set desktop picture to POSIX file \"$HOME/.zisheng-ai/wallpaper.png\""
+osascript -e "tell application \"Finder\" to set desktop picture to POSIX file \"$HOME/Pictures/better-image-gen/wallpaper.png\""
 ```
 
 ---
@@ -326,7 +326,7 @@ After softening, retry the full cascade once. If every model still fails, skip a
 For multiple images, launch one background process per image and `wait` for all:
 
 ```bash
-OUT_DIR="$HOME/.zisheng-ai"
+OUT_DIR="$HOME/Pictures/better-image-gen"
 mkdir -p "$OUT_DIR"
 
 # Set PROMPT and OUTPUT_PATH per item, run in background

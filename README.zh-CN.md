@@ -21,7 +21,7 @@
 做一张 Mac 动态壁纸，深海珊瑚礁，白天/夜晚切换
 ```
 
-技能自动选模型、处理降级、后处理输出，文件保存到 `~/.zisheng-ai/`。
+技能自动选模型、处理降级、后处理输出，文件保存到 `~/Pictures/better-image-gen/`。
 
 ---
 
@@ -78,7 +78,7 @@ unset  APIYI_MODEL           # 恢复默认（gpt）
 
 **依赖：** `pip3 install pillow-heif`（内置 libheif，无需 Homebrew）
 
-**输出路径：** `~/.zisheng-ai/dynamic-wallpaper/wallpaper-apr.heic`
+**输出路径：** `~/Pictures/better-image-gen/dynamic-wallpaper/wallpaper-apr.heic`
 
 > **macOS Sonoma 说明：** 时间型（h24）HEIC 动态壁纸在 Sonoma 上已失效——苹果将该格式迁移到私有 `.madesktop` 体系。亮/暗模式切换（apr）完全可用。
 
@@ -88,9 +88,9 @@ unset  APIYI_MODEL           # 恢复默认（gpt）
 
 | 资产类型 | 格式 | 路径 |
 |---------|------|------|
-| 封面 / 插图 | 有损 WebP q78 | `~/.zisheng-ai/{name}.webp` |
-| Mac 静态壁纸 | 无损 PNG | `~/.zisheng-ai/wallpaper.png` |
-| Mac 动态壁纸 | 2 帧 HEIC | `~/.zisheng-ai/dynamic-wallpaper/wallpaper-apr.heic` |
+| 封面 / 插图 | 有损 WebP q78 | `~/Pictures/better-image-gen/{name}.webp` |
+| Mac 静态壁纸 | 无损 PNG | `~/Pictures/better-image-gen/wallpaper.png` |
+| Mac 动态壁纸 | 2 帧 HEIC | `~/Pictures/better-image-gen/dynamic-wallpaper/wallpaper-apr.heic` |
 | Logo | PNG（pngquant） | 项目本地 |
 | 元数据 | JSON | 与图片同目录 |
 

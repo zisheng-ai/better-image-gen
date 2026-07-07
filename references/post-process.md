@@ -165,7 +165,7 @@ GENERATION_MS=$(printf '%s\n' "$GEN_LOG" | awk -F: '/^ELAPSED_MS:/{v=$2} END{pri
 RESPONSE_FORMAT=$(printf '%s\n' "$GEN_LOG" | awk -F: '/^RESPONSE_FORMAT:/{v=$2} END{print v}')
 
 # 3. Post-process by model
-OUT_DIR="$HOME/.zisheng-ai"
+OUT_DIR="$HOME/Pictures/better-image-gen"
 mkdir -p "$OUT_DIR"
 FINAL="$OUT_DIR/image.webp"
 case "$MODEL_USED" in

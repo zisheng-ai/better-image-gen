@@ -69,6 +69,7 @@ Every generated image is:
 - **Format:** lossy WebP (q78 for covers/hero images, q72 for inline illustrations)
 - **Intermediate:** PNG written to `/tmp/` — deleted after WebP conversion
 - **Deliverable:** final image + required `.json` metadata file (model, requested size, actual resolution, file size, generation time, post-processing notes, prompt)
+- **Default directory:** `~/Pictures/better-image-gen/`. Create it with `mkdir -p "$HOME/Pictures/better-image-gen"` before writing deliverables.
 
 After every generation task finishes, list every output image in the final response with:
 - file path

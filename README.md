@@ -21,7 +21,7 @@ Create 8 product images in parallel for my store
 做一张 Mac 动态壁纸，深海珊瑚礁，白天/夜晚切换
 ```
 
-The skill picks the right model, handles fallbacks, post-processes output, and saves files to `~/.zisheng-ai/`.
+The skill picks the right model, handles fallbacks, post-processes output, and saves files to `~/Pictures/better-image-gen/`.
 
 ---
 
@@ -79,7 +79,7 @@ Make a dynamic wallpaper — underwater coral reef, day and night
 
 **Requirements:** `pip3 install pillow-heif` (bundles libheif, no Homebrew needed)
 
-**Output:** `~/.zisheng-ai/dynamic-wallpaper/wallpaper-apr.heic`
+**Output:** `~/Pictures/better-image-gen/dynamic-wallpaper/wallpaper-apr.heic`
 
 > macOS Sonoma note: time-based (h24) HEIC wallpapers no longer work — Apple migrated that format to a private `.madesktop` system. Light/Dark (apr) works fully.
 
@@ -89,9 +89,9 @@ Make a dynamic wallpaper — underwater coral reef, day and night
 
 | Asset | Format | Location |
 |-------|--------|----------|
-| Cover / illustration | Lossy WebP q78 | `~/.zisheng-ai/{name}.webp` |
-| Mac static wallpaper | Lossless PNG | `~/.zisheng-ai/wallpaper.png` |
-| Mac dynamic wallpaper | 2-frame HEIC | `~/.zisheng-ai/dynamic-wallpaper/wallpaper-apr.heic` |
+| Cover / illustration | Lossy WebP q78 | `~/Pictures/better-image-gen/{name}.webp` |
+| Mac static wallpaper | Lossless PNG | `~/Pictures/better-image-gen/wallpaper.png` |
+| Mac dynamic wallpaper | 2-frame HEIC | `~/Pictures/better-image-gen/dynamic-wallpaper/wallpaper-apr.heic` |
 | Logo | PNG (pngquant) | project-local |
 | Metadata | JSON | alongside each image |
 
