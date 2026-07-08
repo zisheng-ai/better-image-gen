@@ -17,7 +17,7 @@ Load first:
 | Final format | `.webp` |
 | Quality | q78 |
 | Primary size | `1664x2496` |
-| Model flow | GPT primary → softened GPT retry |
+| Model flow | GPT primary → softened GPT retry → Gemini → Doubao |
 
 Keep prompts suggestive but non-explicit. Run the prompt through the compliance layer first. If GPT rejects the first prompt, soften fabric-failure, nudity, explicit proximity, platform/brand, or exact-text wording and retry GPT once.
 
@@ -51,15 +51,23 @@ mkdir -p "$OUT_DIR"
 OUTPUT_PATH="/tmp/image_output.png"
 FINAL_PATH="$OUT_DIR/${OUTPUT_NAME:-high-allure}.webp"
 
-if   GEN_LOG=$(gen_image_apiyi "$MODEL_GPT" "${REQ_SIZE:-848x1280}" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT"; SIZE="${REQ_SIZE:-848x1280}"
-elif GEN_LOG=$(gen_image_apiyi "$MODEL_GPT" "${REQ_SIZE:-848x1280}" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT"; SIZE="${REQ_SIZE:-848x1280}"
+SIZE="${REQ_SIZE:-848x1280}"
+if   GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "$SIZE"      "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT"
+elif GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "$SIZE"      "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT"   # softened retry
+elif GEN_LOG=$(gen_image_apiyi "$MODEL_GEMINI" "$SIZE"      "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GEMINI"
+elif GEN_LOG=$(gen_image_apiyi "$MODEL_DOUBAO" "1664x2496"  "$OUTPUT_PATH"); then MODEL_USED="$MODEL_DOUBAO"; SIZE="1664x2496"
 else echo "ALL_MODELS_FAILED"; exit 1
 fi
 
 GENERATION_MS=$(printf '%s\n' "$GEN_LOG" | awk -F: '/^ELAPSED_MS:/{v=$2} END{print v+0}')
 RESPONSE_FORMAT=$(printf '%s\n' "$GEN_LOG" | awk -F: '/^RESPONSE_FORMAT:/{v=$2} END{print v}')
 
-POSTPROCESS_NOTE="direct gpt webp q78"
+POSTPROCESS_NOTE="direct webp q78"
+if [ "$MODEL_USED" = "$MODEL_DOUBAO" ]; then
+  strip_doubao_watermark "$OUTPUT_PATH" 848 1280
+  SIZE="1664x2496 (cropped+resized to 848x1280)"
+  POSTPROCESS_NOTE="doubao watermark crop, resize 848x1280, webp q78"
+fi
 to_webp "$OUTPUT_PATH" "$FINAL_PATH" 78
 rm -f "$OUTPUT_PATH"
 write_image_metadata "$FINAL_PATH" "${FINAL_PATH%.*}.json" "$MODEL_USED" "$SIZE" "$GENERATION_MS" "$RESPONSE_FORMAT" "$POSTPROCESS_NOTE"

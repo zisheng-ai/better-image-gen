@@ -17,7 +17,7 @@ Load first:
 | Final format | `.png` for transparency-critical assets |
 | Logo output | `512x512` PNG |
 | Favicon output | `256x256` PNG |
-| Model flow | GPT `1280x1280` → GPT retry |
+| Model flow | GPT `1280x1280` → GPT retry → Gemini `1280x1280` (no Doubao — watermark crop and upscale can damage alpha edges) |
 
 Use PNG for source art because alpha is easier to verify and preserve. Use WebP only when the user explicitly wants WebP.
 
@@ -45,10 +45,12 @@ mkdir -p "$OUT_DIR"
 OUTPUT_PATH="/tmp/logo_output.png"
 FINAL_PATH="$OUT_DIR/${OUTPUT_NAME:-logo}.png"
 
-if   GEN_LOG=$(gen_image_apiyi "$MODEL_GPT" "1280x1280" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT"; SIZE="1280x1280"
-elif GEN_LOG=$(gen_image_apiyi "$MODEL_GPT" "1280x1280" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT"; SIZE="1280x1280"
+if   GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "1280x1280" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT"
+elif GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "1280x1280" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT"
+elif GEN_LOG=$(gen_image_apiyi "$MODEL_GEMINI" "1280x1280" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GEMINI"
 else echo "LOGO_GENERATION_FAILED"; exit 1
 fi
+SIZE="1280x1280"
 
 GENERATION_MS=$(printf '%s\n' "$GEN_LOG" | awk -F: '/^ELAPSED_MS:/{v=$2} END{print v+0}')
 RESPONSE_FORMAT=$(printf '%s\n' "$GEN_LOG" | awk -F: '/^RESPONSE_FORMAT:/{v=$2} END{print v}')

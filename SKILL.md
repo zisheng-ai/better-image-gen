@@ -30,26 +30,28 @@ AI image generation skill powered by [apiyi](https://api.apiyi.com/register/?aff
 
 ## Model
 
-Only one model is supported:
+GPT is primary; every type falls back through Gemini, then Doubao (except sprite loop and logo/icon, which stop at Gemini):
 
-| Model ID | Best for |
+| Model ID | Role |
 |---|---|
-| `gpt-image-2-all` | Photorealistic photos, portraits, product shots, wallpapers, sprite sheets |
+| `gpt-image-2-all` | Primary. Best prompt adherence and photorealism. |
+| `gemini-3.1-flash-image-4k` | First fallback. Free-form sizes, no watermark, true 4K. |
+| `doubao-seedream-5-0-260128` | Last-resort fallback. Watermarked (auto-cropped), has a pixel-area floor. |
 
-`MODEL_GPT="gpt-image-2-all"` is set in `references/generation.md`. Do not use other image models or model override variables.
+`MODEL_GPT`, `MODEL_GEMINI`, `MODEL_DOUBAO` are set in `references/generation.md`. Do not use model override environment variables.
 
 **Size defaults by use case** (user can override any size within model constraints):
 
 | Use case | Default size | Model order |
 |---|---|---|
-| Portrait / illustration | `848×1280` | GPT |
-| High-allure (T3+) | `848×1280` | GPT with compliance-normalized/softened prompt if needed |
-| Logo / favicon | `1280×1280` | GPT |
-| **Mac wallpaper (static)** | `3840×2160` (16:9 4K) | GPT |
-| **Mac dynamic wallpaper (apr)** | `3840×2160` × 2 frames | GPT |
-| **Sprite loop** | `1280×960` sheet → 12 frames | GPT |
+| Portrait / illustration | `848×1280` | GPT → Gemini → Doubao |
+| High-allure (T3+) | `848×1280` | GPT (compliance-normalized/softened) → Gemini → Doubao |
+| Logo / favicon | `1280×1280` | GPT → Gemini |
+| **Mac wallpaper (static)** | `3840×2160` (16:9 4K) | GPT → Gemini → Doubao |
+| **Mac dynamic wallpaper (apr)** | `3840×2160` × 2 frames | GPT → Gemini → Doubao (per frame) |
+| **Sprite loop** | `1280×960` sheet → 12 frames | GPT → Gemini |
 
-GPT model specs are in `references/apiyi.md`.
+Full model specs are in `references/apiyi.md`.
 
 ---
 

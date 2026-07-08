@@ -23,7 +23,7 @@ Load first:
 | Default frames | 12 |
 | Sprite sheet layout | 4 columns x 3 rows |
 | Frame size | `256x256` |
-| Model flow | GPT `1280x960` → GPT retry |
+| Model flow | GPT `1280x960` → GPT retry → Gemini `1280x960` (no Doubao — watermark crop and upscale break the sprite grid) |
 
 The source sheet is a generation target, not the final asset. Split it into frames and verify the loop.
 
@@ -58,10 +58,12 @@ mkdir -p "$FRAME_DIR"
 OUTPUT_PATH="/tmp/${SLUG}_sheet.png"
 SHEET_PATH="$OUT_DIR/sprite-sheet.png"
 
-if   GEN_LOG=$(gen_image_apiyi "$MODEL_GPT" "1280x960" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT"; SIZE="1280x960"
-elif GEN_LOG=$(gen_image_apiyi "$MODEL_GPT" "1280x960" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT"; SIZE="1280x960"
+if   GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "1280x960" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT"
+elif GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "1280x960" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT"
+elif GEN_LOG=$(gen_image_apiyi "$MODEL_GEMINI" "1280x960" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GEMINI"
 else echo "SPRITE_LOOP_GENERATION_FAILED"; exit 1
 fi
+SIZE="1280x960"
 
 GENERATION_MS=$(printf '%s\n' "$GEN_LOG" | awk -F: '/^ELAPSED_MS:/{v=$2} END{print v+0}')
 RESPONSE_FORMAT=$(printf '%s\n' "$GEN_LOG" | awk -F: '/^RESPONSE_FORMAT:/{v=$2} END{print v}')

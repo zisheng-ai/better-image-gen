@@ -48,24 +48,40 @@ mkdir -p "$OUT_DIR"
 (
   export PROMPT="$PROMPT_LIGHT"
   OUTPUT_PATH="/tmp/dw_light.png"
-  if   GEN_LOG=$(gen_image_apiyi "$MODEL_GPT" "3840x2160" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT"; SIZE="3840x2160"
-  elif GEN_LOG=$(gen_image_apiyi "$MODEL_GPT" "3840x2160" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT"; SIZE="3840x2160"
+  if   GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "3840x2160" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT";    SIZE="3840x2160"
+  elif GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "3840x2160" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT";    SIZE="3840x2160"
+  elif GEN_LOG=$(gen_image_apiyi "$MODEL_GEMINI" "3840x2160" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GEMINI"; SIZE="3840x2160"
+  elif GEN_LOG=$(gen_image_apiyi "$MODEL_DOUBAO" "2560x1600" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_DOUBAO"; SIZE="2560x1600"
   else echo "⚠ light — all failed"; exit 1; fi
   GENERATION_MS=$(printf '%s\n' "$GEN_LOG" | awk -F: '/^ELAPSED_MS:/{v=$2} END{print v+0}')
   RESPONSE_FORMAT=$(printf '%s\n' "$GEN_LOG" | awk -F: '/^RESPONSE_FORMAT:/{v=$2} END{print v}')
-  write_image_metadata "$OUTPUT_PATH" "$OUT_DIR/light-frame.json" "$MODEL_USED" "$SIZE" "$GENERATION_MS" "$RESPONSE_FORMAT" "dynamic wallpaper light frame png"
+  POSTPROCESS_NOTE="dynamic wallpaper light frame png"
+  if [ "$MODEL_USED" = "$MODEL_DOUBAO" ]; then
+    strip_doubao_watermark "$OUTPUT_PATH" 3840 2160
+    SIZE="2560x1600 (cropped+resized to 3840x2160)"
+    POSTPROCESS_NOTE="doubao watermark crop, resize 3840x2160, dynamic wallpaper light frame png"
+  fi
+  write_image_metadata "$OUTPUT_PATH" "$OUT_DIR/light-frame.json" "$MODEL_USED" "$SIZE" "$GENERATION_MS" "$RESPONSE_FORMAT" "$POSTPROCESS_NOTE"
   echo "✓ light — $MODEL_USED"
 ) > /tmp/dw_log_light.log 2>&1 &
 
 (
   export PROMPT="$PROMPT_DARK"
   OUTPUT_PATH="/tmp/dw_dark.png"
-  if   GEN_LOG=$(gen_image_apiyi "$MODEL_GPT" "3840x2160" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT"; SIZE="3840x2160"
-  elif GEN_LOG=$(gen_image_apiyi "$MODEL_GPT" "3840x2160" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT"; SIZE="3840x2160"
+  if   GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "3840x2160" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT";    SIZE="3840x2160"
+  elif GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "3840x2160" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT";    SIZE="3840x2160"
+  elif GEN_LOG=$(gen_image_apiyi "$MODEL_GEMINI" "3840x2160" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GEMINI"; SIZE="3840x2160"
+  elif GEN_LOG=$(gen_image_apiyi "$MODEL_DOUBAO" "2560x1600" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_DOUBAO"; SIZE="2560x1600"
   else echo "⚠ dark — all failed"; exit 1; fi
   GENERATION_MS=$(printf '%s\n' "$GEN_LOG" | awk -F: '/^ELAPSED_MS:/{v=$2} END{print v+0}')
   RESPONSE_FORMAT=$(printf '%s\n' "$GEN_LOG" | awk -F: '/^RESPONSE_FORMAT:/{v=$2} END{print v}')
-  write_image_metadata "$OUTPUT_PATH" "$OUT_DIR/dark-frame.json" "$MODEL_USED" "$SIZE" "$GENERATION_MS" "$RESPONSE_FORMAT" "dynamic wallpaper dark frame png"
+  POSTPROCESS_NOTE="dynamic wallpaper dark frame png"
+  if [ "$MODEL_USED" = "$MODEL_DOUBAO" ]; then
+    strip_doubao_watermark "$OUTPUT_PATH" 3840 2160
+    SIZE="2560x1600 (cropped+resized to 3840x2160)"
+    POSTPROCESS_NOTE="doubao watermark crop, resize 3840x2160, dynamic wallpaper dark frame png"
+  fi
+  write_image_metadata "$OUTPUT_PATH" "$OUT_DIR/dark-frame.json" "$MODEL_USED" "$SIZE" "$GENERATION_MS" "$RESPONSE_FORMAT" "$POSTPROCESS_NOTE"
   echo "✓ dark — $MODEL_USED"
 ) > /tmp/dw_log_dark.log 2>&1 &
 
@@ -161,7 +177,7 @@ Wallpaper switches automatically with Light/Dark mode. No further action needed.
 6. Tell user: switches with Light/Dark mode toggle in System Settings > Appearance
 ```
 
-**Cost:** 2 × GPT Image 2 API calls.
+**Cost:** 2 × API calls, GPT primary with Gemini/Doubao cascade fallback per frame.
 
 ---
 

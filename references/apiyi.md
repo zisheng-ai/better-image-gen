@@ -1,6 +1,6 @@
-# APIyi — GPT Image API Reference
+# APIyi — API Reference
 
-OpenAI-compatible image endpoint used by this skill. This skill only uses `gpt-image-2-all`.
+Unified image generation proxy exposing multiple models under a single OpenAI-compatible endpoint. This skill uses `gpt-image-2-all` as primary, with `gemini-3.1-flash-image-4k` and `doubao-seedream-5-0-260128` as cascade fallbacks — see `references/generation.md`.
 
 - **Docs:** https://docs.apiyi.com/
 - **Sign up:** https://api.apiyi.com/register/?aff_code=ijv5
@@ -75,6 +75,55 @@ if b64.startswith("data:"):          # strip prefix if present
     b64 = b64.split(",", 1)[1]
 with open("output.png", "wb") as f:
     f.write(base64.b64decode(b64))
+```
+
+---
+
+### gemini-3.1-flash-image-4k
+
+- **Use:** first fallback when GPT fails or times out
+- **Sizes:** free-form — any `WxH` works, no preset constraints
+- **Output:** true 4K resolution (~9 MB PNG), no watermark
+- **Response:** `b64_json`, raw base64 (no `data:` content prefix — decode directly, no stripping needed)
+
+**Minimal request:**
+
+```bash
+curl "https://api.apiyi.com/v1/images/generations" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $APIYI_API_KEY" \
+  --max-time 300 \
+  -d '{
+    "model": "gemini-3.1-flash-image-4k",
+    "prompt": "...",
+    "size": "3840x2160"
+  }'
+```
+
+---
+
+### doubao-seedream-5-0-260128
+
+- **Use:** last-resort fallback when both GPT and Gemini fail
+- **Price:** lower than gpt-image-2-all
+- **Minimum pixel area:** 3,686,400 px (hard error below this floor). Use `1664×2496` for portrait, `1920×1920` for square — request oversized and resize down if the type's target is smaller.
+- **Sizes:** free-form; no preset table required
+- **Response:** `b64_json` (raw base64, **no** prefix) **or** `url` (CDN link, valid ~24 h)
+- **Watermark:** stamps `AI生成` in the bottom-right corner — must crop ~7 % from the bottom after download via `strip_doubao_watermark` in `references/post-process.md`
+- **Skip for:** sprite sheets (breaks the frame grid) and transparent logo/icon art (watermark crop + upscale can damage alpha edges)
+
+**Minimal request:**
+
+```bash
+curl "https://api.apiyi.com/v1/images/generations" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $APIYI_API_KEY" \
+  --max-time 300 \
+  -d '{
+    "model": "doubao-seedream-5-0-260128",
+    "prompt": "...",
+    "size": "1664x2496"
+  }'
 ```
 
 ---
