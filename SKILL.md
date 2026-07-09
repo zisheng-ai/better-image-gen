@@ -45,7 +45,6 @@ GPT is primary; every type falls back through Gemini, then Doubao (except sprite
 | Use case | Default size | Model order |
 |---|---|---|
 | Portrait / illustration | `848×1280` | GPT → Gemini → Doubao |
-| High-allure (T3+) | `848×1280` | GPT (compliance-normalized/softened) → Gemini → Doubao |
 | Logo / favicon | `1280×1280` | GPT → Gemini |
 | **Mac wallpaper (static)** | `3840×2160` (16:9 4K) | GPT → Gemini → Doubao |
 | **Mac dynamic wallpaper (apr)** | `3840×2160` × 2 frames | GPT → Gemini → Doubao (per frame) |
@@ -61,8 +60,8 @@ Pick one type reference per task:
 
 | Request | Load |
 |---|---|
-| Portrait, cover, banner, hero, illustration, product image | `references/portrait.md` |
-| Suggestive romance/ad creative likely to trigger GPT safety filters | `references/high-allure.md` |
+| **Text-heavy cover / competition (大赛/黑客松) entry cover / product KV / PPT hero where accurate text + product info must appear** | `references/text-poster.md` |
+| Portrait, cover, banner, hero, illustration, product image (no baked-in text) | `references/portrait.md` |
 | Logo, favicon, app icon source art, mascot sticker, transparent cutout | `references/logo-icon.md` |
 | Static Mac/desktop wallpaper | `references/static-wallpaper.md` |
 | Light/Dark Mac dynamic wallpaper | `references/dynamic-wallpaper.md` |
@@ -123,7 +122,6 @@ When the user asks for a logo, icon, app icon source art, favicon, mascot sticke
 - `references/prompt-compliance.md` — GPT Image 2 prompt normalization, safety boundary, rejection retry policy
 - `references/post-process.md` — WebP conversion, resize, PNG compression
 - `references/portrait.md` — portraits, covers, banners, hero images, general single-image pipeline
-- `references/high-allure.md` — suggestive romance/editorial imagery with GPT prompt-softening rules
 - `references/logo-icon.md` — transparent logos, icons, favicons, cutouts
 - `references/static-wallpaper.md` — Mac/static wallpaper PNG pipeline
 - `references/dynamic-wallpaper.md` — Mac dynamic wallpaper: 2-frame Light/Dark HEIC with `apple_desktop:apr`
