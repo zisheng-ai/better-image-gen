@@ -1,6 +1,6 @@
 # better-image-gen
 
-**A Claude Code skill for AI image generation** — powered by [apiyi](https://api.apiyi.com/register/?aff_code=ijv5), using the OpenAI-compatible `gpt-image-2-all` image API.
+**A Skill for AI image generation** — powered by [apiyi](https://api.apiyi.com/register/?aff_code=ijv5), using the OpenAI-compatible image API.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude_Code-Skill-blueviolet)](https://claude.ai/code)
