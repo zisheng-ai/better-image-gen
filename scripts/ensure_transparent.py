@@ -9,6 +9,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument("input")
 parser.add_argument("output")
 parser.add_argument("--tolerance", type=int, default=42)
+parser.add_argument("--edge-mode", choices=("pixel", "soft"), default="soft")
+parser.add_argument("--softness", type=int, default=28)
 args = parser.parse_args()
 
 im = Image.open(args.input).convert("RGBA")
@@ -38,6 +40,26 @@ while queue:
     for nx, ny in ((x+1,y), (x-1,y), (x,y+1), (x,y-1)):
         if 0 <= nx < w and 0 <= ny < h:
             queue.append((nx, ny))
+
+# Natural hair/fur needs a narrow fractional-alpha transition. Pixel art must
+# retain exact hard edges, so callers opt into `pixel` mode for sprites/badges.
+if args.edge_mode == "soft":
+    alpha = im.getchannel("A")
+    apx = alpha.load()
+    original = Image.open(args.input).convert("RGBA")
+    opx = original.load()
+    for y in range(h):
+        for x in range(w):
+            if apx[x, y] == 0:
+                continue
+            if not any(0 <= nx < w and 0 <= ny < h and apx[nx, ny] == 0
+                       for nx, ny in ((x+1,y),(x-1,y),(x,y+1),(x,y-1))):
+                continue
+            r, g, b, old_a = opx[x, y]
+            distance = min(((r-r0)**2 + (g-g0)**2 + (b-b0)**2) ** 0.5 for r0, g0, b0 in references)
+            lo, hi = args.tolerance, args.tolerance + args.softness
+            if distance < hi:
+                apx[x, y] = int(old_a * max(0.0, min(1.0, (distance-lo) / max(1, hi-lo))))
 
 alpha = im.getchannel("A")
 transparent = sum(1 for value in alpha.getdata() if value == 0)
