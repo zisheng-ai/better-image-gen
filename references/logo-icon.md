@@ -68,11 +68,10 @@ print_image_summary "${FINAL_PATH%.*}.json"
 open "$FINAL_PATH"
 ```
 
-If corners are black/white or a tile is baked in, remove only edge-connected background. For Argos:
+If corners are black/white/gray/tinted or a tile is baked in, remove only edge-connected background:
 
 ```bash
-swift run --package-path /Users/zisheng/github/argos transparentize-black-background \
-  "$FINAL_PATH" /tmp/logo-transparent.png --threshold 18
+python3 scripts/ensure_transparent.py "$FINAL_PATH" /tmp/logo-transparent.png
 mv /tmp/logo-transparent.png "$FINAL_PATH"
 sips -g hasAlpha "$FINAL_PATH"
 ```

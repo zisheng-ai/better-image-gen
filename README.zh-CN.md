@@ -1,6 +1,6 @@
 # better-image-gen
 
-**Claude Code AI 生图技能** — 由 [apiyi](https://api.apiyi.com/register/?aff_code=ijv5) 驱动，使用 OpenAI 兼容的 `gpt-image-2-all` 图片接口。
+**Claude Code 多模型 AI 生图技能** — 由 [apiyi](https://api.apiyi.com/register/?aff_code=ijv5) 驱动，通过 OpenAI 兼容图片接口自动级联 GPT、Gemini 与豆包模型。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude_Code-Skill-blueviolet)](https://claude.ai/code)
@@ -22,17 +22,19 @@
 做一张 Mac 动态壁纸，深海珊瑚礁，白天/夜晚切换
 ```
 
-技能按图片类型选择 GPT 工作流、后处理输出，并保存到 `~/Pictures/better-image-gen/`。
+技能按图片类型选择工作流，优先使用 GPT，失败时自动降级到 Gemini 和豆包，再完成后处理并保存到 `~/Pictures/better-image-gen/`。
 
-生成前会先过一层 GPT Image 2 提示词合规化：自动弱化平台 Logo、图片内精确文字、露骨内容、血腥暴力、模仿在世艺术家等高风险表达，减少正常创意需求被误拒的概率。
+生成前会先过一层提示词合规化：自动弱化平台 Logo、图片内精确文字、露骨内容、血腥暴力、模仿在世艺术家等高风险表达，减少正常创意需求被误拒的概率。
 
 ---
 
 ## 模型
 
-| 模型 ID | 适合场景 | 尺寸 |
-|---------|---------|------|
-| `gpt-image-2-all` | 写实照片、人像、产品图、壁纸、sprite sheet | 30 个预设 |
+| 模型 ID | 角色 | 说明 |
+|---------|------|------|
+| `gpt-image-2-all` | 主模型 | 提示词遵循和写实效果最佳，支持 30 个尺寸预设 |
+| `gemini-3.1-flash-image-4k` | 第一降级模型 | 支持自由尺寸、无水印、原生 4K |
+| `doubao-seedream-5-0-260128` | 最终兜底模型 | 输出带水印，自动裁切；存在最小像素面积限制 |
 
 **GPT 16:9 尺寸预设：**
 
@@ -42,7 +44,7 @@
 | 2K | 2048×1152 |
 | 4K | 3840×2160 |
 
-完整 30 个预设见 `references/apiyi.md`。
+完整模型规格和尺寸约束见 `references/apiyi.md`。
 
 ---
 
@@ -50,13 +52,12 @@
 
 | 请求类型 | 模型 | 输出 |
 |---------|-------------|------|
-| 人像 / 插图 | GPT | `.webp` q78，≤ 300 KB |
-| Logo / favicon | GPT | `.png`（pngquant），≤ 100 KB |
-| Mac 静态壁纸（4K） | GPT | `wallpaper.png`（无损 PNG） |
-| Mac 动态壁纸 | GPT | `wallpaper-apr.heic`（2 帧，亮/暗模式切换） |
-| Sprite loop 帧动画 | GPT | 序列帧 PNG + `preview.gif` |
-| 高质感内容（T3+） | GPT，必要时软化 prompt | `.webp` q78 |
-| 批量生成（N 张） | 每张独立 GPT 请求 | N × `.webp`，并行生成 |
+| 人像 / 插图 | GPT → Gemini → 豆包 | `.webp` q78，≤ 300 KB |
+| Logo / favicon | GPT → Gemini | `.png`（pngquant），≤ 100 KB |
+| Mac 静态壁纸（4K） | GPT → Gemini → 豆包 | `wallpaper.png`（无损 PNG） |
+| Mac 动态壁纸 | 每帧 GPT → Gemini → 豆包 | `wallpaper-apr.heic`（2 帧，亮/暗模式切换） |
+| Sprite loop 帧动画 | GPT → Gemini | 序列帧 PNG + `preview.gif` |
+| 批量生成（N 张） | 每张独立执行模型级联 | N × `.webp`，并行生成 |
 
 ---
 
@@ -128,9 +129,9 @@ pip3 install pillow-heif
 ```
 SKILL.md                      ← 技能入口与触发规则
 references/
-  apiyi.md                    ← API 鉴权、模型规格、尺寸表、错误码
+  apiyi.md                    ← API 鉴权、模型规格、尺寸约束、错误码
   generation.md               ← API Key 检查、模型别名、gen_image_apiyi、metadata helper
-  prompt-compliance.md        ← GPT Image 2 提示词合规化与重试策略
+  prompt-compliance.md        ← 提示词合规化与拒绝重试策略
   post-process.md             ← WebP 转换、尺寸调整、PNG 压缩
   portrait.md                 ← 人像、封面、banner、通用单图
   high-allure.md              ← 高质感 romance / editorial 图片

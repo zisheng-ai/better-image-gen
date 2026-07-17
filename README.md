@@ -1,6 +1,6 @@
 # better-image-gen
 
-**A Skill for AI image generation** — powered by [apiyi](https://api.apiyi.com/register/?aff_code=ijv5), using the OpenAI-compatible image API.
+**A multi-model AI image generation Skill** — powered by [apiyi](https://api.apiyi.com/register/?aff_code=ijv5), with automatic GPT, Gemini, and Doubao fallback through an OpenAI-compatible image API.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude_Code-Skill-blueviolet)](https://claude.ai/code)
@@ -22,17 +22,19 @@ Make a RunCat-style menu bar sprite loop of a tiny robot running
 做一张 Mac 动态壁纸，深海珊瑚礁，白天/夜晚切换
 ```
 
-The skill routes each image type to the right GPT workflow, post-processes output, and saves files to `~/Pictures/better-image-gen/`.
+The skill routes each image type to the right workflow, tries GPT first, automatically falls back to Gemini and then Doubao when needed, post-processes output, and saves files to `~/Pictures/better-image-gen/`.
 
-It also applies a GPT Image 2 prompt compliance layer before generation: prompts are normalized away from platform logos, exact in-image text, explicit content, graphic violence, and living-artist imitation so routine creative requests are less likely to be rejected accidentally.
+It also applies a prompt compliance layer before generation: prompts are normalized away from platform logos, exact in-image text, explicit content, graphic violence, and living-artist imitation so routine creative requests are less likely to be rejected accidentally.
 
 ---
 
 ## Model
 
-| Model | Best for | Sizes |
-|-------|----------|-------|
-| `gpt-image-2-all` | Photorealistic photos, portraits, product shots, wallpapers, sprite sheets | 30 presets |
+| Model | Role | Notes |
+|-------|------|-------|
+| `gpt-image-2-all` | Primary | Best prompt adherence and photorealism; 30 size presets |
+| `gemini-3.1-flash-image-4k` | First fallback | Free-form sizes, no watermark, true 4K |
+| `doubao-seedream-5-0-260128` | Last-resort fallback | Watermarked output is auto-cropped; pixel-area floor applies |
 
 **GPT size presets (16:9 tier):**
 
@@ -42,7 +44,7 @@ It also applies a GPT Image 2 prompt compliance layer before generation: prompts
 | 2K   | 2048×1152 |
 | 4K   | 3840×2160 |
 
-Full 30-preset table in `references/apiyi.md`.
+Full model specifications and size constraints are in `references/apiyi.md`.
 
 ---
 
@@ -50,13 +52,12 @@ Full 30-preset table in `references/apiyi.md`.
 
 | Request | Model | Output |
 |---------|--------------|--------|
-| Portrait / illustration | GPT | `.webp` q78, ≤ 300 KB |
-| Logo / favicon | GPT | `.png` (pngquant), ≤ 100 KB |
-| Mac static wallpaper (4K) | GPT | `wallpaper.png` (lossless PNG) |
-| Mac dynamic wallpaper | GPT | `wallpaper-apr.heic` (2-frame, Light/Dark) |
-| Sprite loop | GPT | numbered PNG frames + `preview.gif` |
-| High-allure content (T3+) | GPT with compliance-normalized prompt if needed | `.webp` q78 |
-| Batch (N images) | GPT per image | N × `.webp`, generated in parallel |
+| Portrait / illustration | GPT → Gemini → Doubao | `.webp` q78, ≤ 300 KB |
+| Logo / favicon | GPT → Gemini | `.png` (pngquant), ≤ 100 KB |
+| Mac static wallpaper (4K) | GPT → Gemini → Doubao | `wallpaper.png` (lossless PNG) |
+| Mac dynamic wallpaper | GPT → Gemini → Doubao per frame | `wallpaper-apr.heic` (2-frame, Light/Dark) |
+| Sprite loop | GPT → Gemini | numbered PNG frames + `preview.gif` |
+| Batch (N images) | Cascade per image | N × `.webp`, generated in parallel |
 
 ---
 
@@ -129,9 +130,9 @@ pip3 install pillow-heif
 ```
 SKILL.md                      ← skill entry point & trigger rules
 references/
-  apiyi.md                    ← API auth, GPT model specs, size tables, error codes
+  apiyi.md                    ← API auth, model specs, size constraints, error codes
   generation.md               ← API key check, model aliases, gen_image_apiyi, metadata helpers
-  prompt-compliance.md        ← GPT Image 2 prompt normalization and retry policy
+  prompt-compliance.md        ← prompt normalization and rejection retry policy
   post-process.md             ← WebP conversion, resize, PNG compression
   portrait.md                 ← portraits, covers, banners, general single images
   high-allure.md              ← suggestive romance/editorial images

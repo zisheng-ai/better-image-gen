@@ -72,7 +72,7 @@ Caveat: independently edited frames have slight frame-to-frame jitter (eye shape
 
 ## Post-processing pipeline
 
-1. **Background removal** — flood-fill from all four edges, clearing pixels that are near-white/light-gray (`r,g,b > 200` and channel spread < 18) or already transparent. Edge-connected only, so light colors inside the subject survive:
+1. **Background removal** — use `python3 scripts/ensure_transparent.py input.png output.png`. It handles solid black, white, gray, or tinted backgrounds by sampling the four corners and only clearing matching edge-connected pixels. Do not use the older near-white-only flood fill for transparency-critical output.
 
 ```python
 from PIL import Image
@@ -108,7 +108,7 @@ def remove_bg(im):
 
 3. **Resize** — LANCZOS down to the delivery size (blocks are large after AI redraw, so LANCZOS stays crisp; NEAREST is only for integer-scaling true pixel sources).
 
-4. **Verify alpha** — check corner pixels have `alpha == 0` before claiming transparency.
+4. **Verify alpha** — the script must print `TRANSPARENCY_OK`; additionally preserve its non-zero exit as a hard generation failure. Never deliver an asset merely because its file format supports alpha.
 
 5. For frame sequences, also emit a `preview.gif` (`duration=100, loop=0, disposal=2`) so the user can eyeball loop smoothness.
 
