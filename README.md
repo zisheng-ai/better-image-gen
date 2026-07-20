@@ -20,7 +20,7 @@ Make a square logo for my app, dark theme, minimalist
 Create 8 product images in parallel for my store
 Make a RunCat-style menu bar sprite loop of a tiny robot running
 Create a Codex-compatible pet: a plush lake otter with all 16 look directions
-做一张 Mac 动态壁纸，深海珊瑚礁，白天/夜晚切换
+Create a Mac dynamic wallpaper of a deep-sea coral reef, with Light/Dark mode variants
 ```
 
 The skill routes each image type to the right workflow, tries GPT first, automatically falls back to Gemini and then Doubao when needed, post-processes output, and saves files to `~/Pictures/better-imagegen/`.
@@ -68,7 +68,7 @@ Full model specifications and size constraints are in `references/apiyi.md`.
 Generates a 2-frame HEIC with `apple_desktop:apr` metadata — macOS switches frames automatically when Light/Dark mode is toggled in System Settings.
 
 ```
-做一张动态壁纸，深夜星空下的山脉
+Make a dynamic wallpaper of mountains beneath a midnight starry sky
 Make a dynamic wallpaper — underwater coral reef, day and night
 ```
 
