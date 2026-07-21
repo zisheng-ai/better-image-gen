@@ -31,7 +31,7 @@ python3 -c 'from PIL import Image; print("Pillow ready")' || {
 
 ## Model Setup
 
-GPT is the primary model. `gpt-image-2-all` times out or fails intermittently with no built-in retry from the API side, so every type reference falls back through Gemini, then Doubao, before giving up.
+Gemini is the primary model. `gemini-3.1-flash-image-4k` is preferred for reliability and latency; every type reference falls back through GPT, then Doubao, before giving up.
 
 ```bash
 MODEL_GPT="gpt-image-2-all"
@@ -39,11 +39,11 @@ MODEL_GEMINI="gemini-3.1-flash-image-4k"
 MODEL_DOUBAO="doubao-seedream-5-0-260128"
 ```
 
-- **GPT** (`$MODEL_GPT`) — primary. Best prompt adherence and photorealism. Retry once on failure/timeout before falling back.
-- **Gemini** (`$MODEL_GEMINI`) — first fallback. Free-form sizing (no preset table), no watermark, true 4K output. Nearly as good as GPT for most content; use its response directly, no extra post-processing.
+- **Gemini** (`$MODEL_GEMINI`) — primary. Free-form sizing (no preset table), no watermark, true 4K output; preferred for normal generation.
+- **GPT** (`$MODEL_GPT`) — first fallback. Best prompt adherence and photorealism; retry once on failure/timeout only when the fallback policy calls for it.
 - **Doubao** (`$MODEL_DOUBAO`) — last-resort fallback. Stamps an `AI生成` watermark bottom-right that must be cropped (`strip_doubao_watermark` in `references/post-process.md`), and has a hard minimum pixel-area floor (3,686,400 px) — request oversized and resize down if the type's target is below that floor.
 
-If GPT fails, normalize/soften the prompt once with `references/prompt-compliance.md` when appropriate, retry GPT once, then fall through to Gemini, then Doubao. Skip Doubao for sprite sheets and transparent logo/icon art — its watermark crop and pixel floor upscaling break sprite grids and alpha-critical edges; those types stop at Gemini.
+If Gemini fails, normalize/soften the prompt once with `references/prompt-compliance.md` when appropriate, then fall through to GPT and Doubao. Skip Doubao for sprite sheets and transparent logo/icon art — its watermark crop and pixel floor upscaling break sprite grids and alpha-critical edges; those types stop at GPT.
 
 ---
 

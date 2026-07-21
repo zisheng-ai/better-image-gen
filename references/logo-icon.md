@@ -17,7 +17,7 @@ Load first:
 | Final format | `.png` for transparency-critical assets |
 | Logo output | `512x512` PNG |
 | Favicon output | `256x256` PNG |
-| Model flow | GPT `1280x1280` → GPT retry → Gemini `1280x1280` (no Doubao — watermark crop and upscale can damage alpha edges) |
+| Model flow | Gemini `1280x1280` → GPT `1280x1280` (no Doubao — watermark crop and upscale can damage alpha edges) |
 
 Use PNG for source art because alpha is easier to verify and preserve. Use WebP only when the user explicitly wants WebP.
 
@@ -45,9 +45,8 @@ mkdir -p "$OUT_DIR"
 OUTPUT_PATH="/tmp/logo_output.png"
 FINAL_PATH="$OUT_DIR/${OUTPUT_NAME:-logo}.png"
 
-if   GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "1280x1280" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT"
+if   GEN_LOG=$(gen_image_apiyi "$MODEL_GEMINI" "1280x1280" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GEMINI"
 elif GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "1280x1280" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT"
-elif GEN_LOG=$(gen_image_apiyi "$MODEL_GEMINI" "1280x1280" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GEMINI"
 else echo "LOGO_GENERATION_FAILED"; exit 1
 fi
 SIZE="1280x1280"

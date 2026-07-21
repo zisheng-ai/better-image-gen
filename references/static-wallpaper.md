@@ -18,7 +18,7 @@ Do not convert wallpapers to WebP. Save lossless PNG.
 | Final file | `wallpaper.png` |
 | Final format | PNG |
 | Primary size | `3840x2160` |
-| Model flow | GPT `3840x2160` → GPT retry → Gemini `3840x2160` → Doubao (upscaled to `3840x2160`) |
+| Model flow | Gemini `3840x2160` → GPT `3840x2160` → Doubao (upscaled to `3840x2160`) |
 
 ---
 
@@ -31,9 +31,9 @@ OUTPUT_PATH="/tmp/wallpaper_output.png"
 FINAL_PATH="$OUT_DIR/wallpaper.png"
 
 SIZE="${REQ_SIZE:-3840x2160}"
-if   GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "$SIZE" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT"
+if   GEN_LOG=$(gen_image_apiyi "$MODEL_GEMINI" "$SIZE" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GEMINI"
 elif GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "$SIZE" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT"
-elif GEN_LOG=$(gen_image_apiyi "$MODEL_GEMINI" "$SIZE" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GEMINI"
+elif GEN_LOG=$(gen_image_apiyi "$MODEL_DOUBAO" "$SIZE" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_DOUBAO"
 elif GEN_LOG=$(gen_image_apiyi "$MODEL_DOUBAO" "2560x1440" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_DOUBAO"; SIZE="2560x1440"
 else echo "ALL_MODELS_FAILED"; exit 1
 fi
