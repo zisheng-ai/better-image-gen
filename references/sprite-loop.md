@@ -59,8 +59,8 @@ mkdir -p "$FRAME_DIR"
 OUTPUT_PATH="/tmp/${SLUG}_sheet.png"
 SHEET_PATH="$OUT_DIR/sprite-sheet.png"
 
-if   GEN_LOG=$(gen_image_apiyi "$MODEL_GEMINI" "1280x960" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GEMINI"
-elif GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "1280x960" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT"
+if   GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "1280x960" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT"
+elif GEN_LOG=$(gen_image_apiyi "$MODEL_GEMINI" "1280x960" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GEMINI"
 else echo "SPRITE_LOOP_GENERATION_FAILED"; exit 1
 fi
 SIZE="1280x960"

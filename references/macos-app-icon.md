@@ -44,15 +44,15 @@ Notes:
 - Tell the model **not** to bake its own rounded-rectangle tile/padding — we apply the squircle
   ourselves. Models often ignore this and return a padded tile anyway; that's fine, the Step 1
   autocrop removes the padding.
-- Generate at `1024x1024`, Gemini → GPT (same fallback as logo/icon; no Doubao — its
+- Generate at `1024x1024`, GPT → Gemini (same fallback as logo/icon; no Doubao — its
   watermark crop wrecks icon edges).
 
 ```bash
 OUT_DIR="${OUT_DIR:-$HOME/Pictures/better-imagegen}"; mkdir -p "$OUT_DIR"
 ART="/tmp/icon_art.png"
 PROMPT="$ICON_PROMPT"
-if   GEN_LOG=$(gen_image_apiyi "$MODEL_GEMINI" "1024x1024" "$ART"); then MODEL_USED="$MODEL_GEMINI"
-elif GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "1024x1024" "$ART"); then MODEL_USED="$MODEL_GPT"
+if   GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "1024x1024" "$ART"); then MODEL_USED="$MODEL_GPT"
+elif GEN_LOG=$(gen_image_apiyi "$MODEL_GEMINI" "1024x1024" "$ART"); then MODEL_USED="$MODEL_GEMINI"
 else echo "ICON_ART_GENERATION_FAILED"; exit 1
 fi
 SIZE="1024x1024"

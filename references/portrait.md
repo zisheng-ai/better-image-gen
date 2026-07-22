@@ -17,7 +17,7 @@ Load first:
 | Final format | `.webp` |
 | Quality | q78 |
 | Primary size | `848x1280` |
-| Model flow | Gemini → GPT → Doubao |
+| Model flow | GPT → Gemini → Doubao |
 
 Use user-requested aspect ratio when clear. Otherwise choose:
 - Portrait / cover: `848x1280`
@@ -50,8 +50,8 @@ OUTPUT_PATH="/tmp/image_output.png"
 FINAL_PATH="$OUT_DIR/${OUTPUT_NAME:-image}.webp"
 
 SIZE="${REQ_SIZE:-848x1280}"
-if   GEN_LOG=$(gen_image_apiyi "$MODEL_GEMINI" "$SIZE"      "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GEMINI"
-elif GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "$SIZE"      "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT"
+if   GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "$SIZE"      "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT"
+elif GEN_LOG=$(gen_image_apiyi "$MODEL_GEMINI" "$SIZE"      "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GEMINI"
 elif GEN_LOG=$(gen_image_apiyi "$MODEL_DOUBAO" "$SIZE"      "$OUTPUT_PATH"); then MODEL_USED="$MODEL_DOUBAO"
 elif GEN_LOG=$(gen_image_apiyi "$MODEL_DOUBAO" "1664x2496"  "$OUTPUT_PATH"); then MODEL_USED="$MODEL_DOUBAO"; SIZE="1664x2496"
 else echo "ALL_MODELS_FAILED"; exit 1

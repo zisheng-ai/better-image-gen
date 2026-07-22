@@ -45,8 +45,8 @@ mkdir -p "$OUT_DIR"
 OUTPUT_PATH="/tmp/logo_output.png"
 FINAL_PATH="$OUT_DIR/${OUTPUT_NAME:-logo}.png"
 
-if   GEN_LOG=$(gen_image_apiyi "$MODEL_GEMINI" "1280x1280" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GEMINI"
-elif GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "1280x1280" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT"
+if   GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "1280x1280" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT"
+elif GEN_LOG=$(gen_image_apiyi "$MODEL_GEMINI" "1280x1280" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GEMINI"
 else echo "LOGO_GENERATION_FAILED"; exit 1
 fi
 SIZE="1280x1280"

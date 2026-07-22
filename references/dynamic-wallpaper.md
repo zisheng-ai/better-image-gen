@@ -48,8 +48,8 @@ mkdir -p "$OUT_DIR"
 (
   export PROMPT="$PROMPT_LIGHT"
   OUTPUT_PATH="/tmp/dw_light.png"
-  if   GEN_LOG=$(gen_image_apiyi "$MODEL_GEMINI" "3840x2160" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GEMINI"; SIZE="3840x2160"
-  elif GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "3840x2160" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT";    SIZE="3840x2160"
+  if   GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "3840x2160" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT";    SIZE="3840x2160"
+  elif GEN_LOG=$(gen_image_apiyi "$MODEL_GEMINI" "3840x2160" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GEMINI"; SIZE="3840x2160"
   elif GEN_LOG=$(gen_image_apiyi "$MODEL_DOUBAO" "3840x2160" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_DOUBAO"; SIZE="3840x2160"
   elif GEN_LOG=$(gen_image_apiyi "$MODEL_DOUBAO" "2560x1440" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_DOUBAO"; SIZE="2560x1440"
   else echo "⚠ light — all failed"; exit 1; fi
@@ -68,8 +68,8 @@ mkdir -p "$OUT_DIR"
 (
   export PROMPT="$PROMPT_DARK"
   OUTPUT_PATH="/tmp/dw_dark.png"
-  if   GEN_LOG=$(gen_image_apiyi "$MODEL_GEMINI" "3840x2160" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GEMINI"; SIZE="3840x2160"
-  elif GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "3840x2160" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT";    SIZE="3840x2160"
+  if   GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "3840x2160" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT";    SIZE="3840x2160"
+  elif GEN_LOG=$(gen_image_apiyi "$MODEL_GEMINI" "3840x2160" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GEMINI"; SIZE="3840x2160"
   elif GEN_LOG=$(gen_image_apiyi "$MODEL_DOUBAO" "3840x2160" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_DOUBAO"; SIZE="3840x2160"
   elif GEN_LOG=$(gen_image_apiyi "$MODEL_DOUBAO" "2560x1440" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_DOUBAO"; SIZE="2560x1440"
   else echo "⚠ dark — all failed"; exit 1; fi
@@ -177,7 +177,7 @@ Wallpaper switches automatically with Light/Dark mode. No further action needed.
 6. Tell user: switches with Light/Dark mode toggle in System Settings > Appearance
 ```
 
-**Cost:** 2 × API calls, Gemini primary with GPT/Doubao cascade fallback per frame.
+**Cost:** 2 × API calls, GPT primary with Gemini/Doubao cascade fallback per frame.
 
 ---
 

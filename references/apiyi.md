@@ -1,6 +1,6 @@
 # APIyi — API Reference
 
-Unified image generation proxy exposing multiple models under a single OpenAI-compatible endpoint. This skill uses `gemini-3.1-flash-image-4k` as primary, with `gpt-image-2-all` and `doubao-seedream-5-0-260128` as cascade fallbacks — see `references/generation.md`.
+Unified image generation proxy exposing multiple models under a single OpenAI-compatible endpoint. This skill uses `gpt-image-2-all` as primary, with `gemini-3.1-flash-image-4k` and `doubao-seedream-5-0-260128` as cascade fallbacks — see `references/generation.md`.
 
 - **Docs:** https://docs.apiyi.com/
 - **Sign up:** https://api.apiyi.com/register/?aff_code=ijv5

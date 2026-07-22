@@ -33,7 +33,7 @@ AI image generation skill powered by [apiyi](https://api.apiyi.com/register/?aff
 
 ## Model
 
-Gemini is primary; every type falls back through GPT, then Doubao (except sprite loop and logo/icon, which stop at GPT):
+GPT is primary; every type falls back through Gemini, then Doubao (except sprite loop and logo/icon, which stop at Gemini):
 
 | Model ID | Role |
 |---|---|
@@ -47,12 +47,12 @@ Gemini is primary; every type falls back through GPT, then Doubao (except sprite
 
 | Use case | Default size | Model order |
 |---|---|---|
-| Portrait / illustration | `848×1280` | Gemini → GPT → Doubao |
-| Logo / favicon | `1280×1280` | Gemini → GPT |
-| **Mac wallpaper (static)** | `3840×2160` (16:9 4K) | Gemini → GPT → Doubao |
-| **Mac dynamic wallpaper (apr)** | `3840×2160` × 2 frames | Gemini → GPT → Doubao (per frame) |
-| **Sprite loop** | `1280×960` sheet → 12 frames | Gemini → GPT |
-| **Codex v2 pet** | `1536×2288` final atlas (8×11 cells) | Gemini → GPT, row-by-row |
+| Portrait / illustration | `848×1280` | GPT → Gemini → Doubao |
+| Logo / favicon | `1280×1280` | GPT → Gemini |
+| **Mac wallpaper (static)** | `3840×2160` (16:9 4K) | GPT → Gemini → Doubao |
+| **Mac dynamic wallpaper (apr)** | `3840×2160` × 2 frames | GPT → Gemini → Doubao (per frame) |
+| **Sprite loop** | `1280×960` sheet → 12 frames | GPT → Gemini |
+| **Codex v2 pet** | `1536×2288` final atlas (8×11 cells) | GPT → Gemini, row-by-row |
 
 Full model specs are in `references/apiyi.md`.
 

@@ -31,8 +31,8 @@ OUTPUT_PATH="/tmp/wallpaper_output.png"
 FINAL_PATH="$OUT_DIR/wallpaper.png"
 
 SIZE="${REQ_SIZE:-3840x2160}"
-if   GEN_LOG=$(gen_image_apiyi "$MODEL_GEMINI" "$SIZE" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GEMINI"
-elif GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "$SIZE" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT"
+if   GEN_LOG=$(gen_image_apiyi "$MODEL_GPT"    "$SIZE" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GPT"
+elif GEN_LOG=$(gen_image_apiyi "$MODEL_GEMINI" "$SIZE" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_GEMINI"
 elif GEN_LOG=$(gen_image_apiyi "$MODEL_DOUBAO" "$SIZE" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_DOUBAO"
 elif GEN_LOG=$(gen_image_apiyi "$MODEL_DOUBAO" "2560x1440" "$OUTPUT_PATH"); then MODEL_USED="$MODEL_DOUBAO"; SIZE="2560x1440"
 else echo "ALL_MODELS_FAILED"; exit 1
